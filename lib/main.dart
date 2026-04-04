@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
 
 void main() {
@@ -50,8 +51,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
+      // Cek apakah user sudah login
+      final destination = AuthService.isLoggedIn
+          ? const MainNavigation()
+          : const LoginScreen();
       Navigator.of(context).pushReplacement(PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const MainNavigation(),
+        pageBuilder: (_, __, ___) => destination,
         transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
         transitionDuration: const Duration(milliseconds: 350),
       ));
@@ -77,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               Container(
                 width: 88, height: 88,
                 decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(24)),
-                child: const Center(child: Icon(Icons.sports_soccer_rounded, color: Colors.white, size: 46)),
+                child: const Icon(Icons.sports_soccer_rounded, color: Colors.white, size: 46),
               ),
               const SizedBox(height: 20),
               const Text('E-ReservLap',

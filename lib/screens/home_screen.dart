@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.bgPage,
       appBar: AppBar(
         title: const Text('E-ReservLap'),
-        actions: [
+        actions: [// profil dipindah ke bottom nav
           IconButton(
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatusScreen())),
             icon: const Icon(Icons.receipt_long_outlined),
