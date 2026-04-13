@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF4A90E2);
-  static const Color primaryLight = Color(0xFFEBF3FD);
-  static const Color primaryDark = Color(0xFF2D72C8);
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color bgPage = Color(0xFFF7F8FA);
-  static const Color bgCard = Color(0xFFFFFFFF);
-  static const Color surface = Color(0xFFF5F6FA);
-  static const Color border = Color(0xFFE8ECF0);
-  static const Color textPrimary = Color(0xFF1A202C);
+  static const Color primary       = Color(0xFF4A90E2);
+  static const Color primaryLight  = Color(0xFFEBF3FD);
+  static const Color primaryDark   = Color(0xFF2D72C8);
+  static const Color white         = Color(0xFFFFFFFF);
+  static const Color bgPage        = Color(0xFFF7F8FA);
+  static const Color bgCard        = Color(0xFFFFFFFF);
+  static const Color surface       = Color(0xFFF5F6FA);
+  static const Color border        = Color(0xFFE8ECF0);
+  static const Color textPrimary   = Color(0xFF1A202C);
   static const Color textSecondary = Color(0xFF718096);
-  static const Color textHint = Color(0xFFA0AEC0);
-  static const Color success = Color(0xFF38A169);
-  static const Color successBg = Color(0xFFEBF9F0);
-  static const Color warning = Color(0xFFD69E2E);
-  static const Color warningBg = Color(0xFFFFF9E6);
-  static const Color error = Color(0xFFE53E3E);
-  static const Color errorBg = Color(0xFFFFF0F0);
+  static const Color textHint      = Color(0xFFA0AEC0);
+  static const Color success       = Color(0xFF38A169);
+  static const Color successBg     = Color(0xFFEBF9F0);
+  static const Color warning       = Color(0xFFD69E2E);
+  static const Color warningBg     = Color(0xFFFFF9E6);
+  static const Color error         = Color(0xFFE53E3E);
+  static const Color errorBg       = Color(0xFFFFF0F0);
 }
 
 class AppTheme {

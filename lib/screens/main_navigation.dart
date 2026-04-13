@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
-import 'booking_screen.dart';
+import 'fields_screen.dart';
+import 'status_screen.dart';
 import 'profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
-
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
@@ -16,17 +16,15 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
-    BookingScreen(),
+    FieldsScreen(),
+    StatusScreen(),
     ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -43,21 +41,10 @@ class _MainNavigationState extends State<MainNavigation> {
           unselectedLabelStyle: const TextStyle(fontSize: 11),
           elevation: 0,
           items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: 'Beranda',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month_outlined),
-              activeIcon: Icon(Icons.calendar_month_rounded),
-              label: 'Booking',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profil',
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home_rounded), label: 'Beranda'),
+            BottomNavigationBarItem(icon: Icon(Icons.stadium_outlined), activeIcon: Icon(Icons.stadium_rounded), label: 'Lapangan'),
+            BottomNavigationBarItem(icon: Icon(Icons.receipt_long_outlined), activeIcon: Icon(Icons.receipt_long_rounded), label: 'Status'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded), activeIcon: Icon(Icons.person_rounded), label: 'Profil'),
           ],
         ),
       ),

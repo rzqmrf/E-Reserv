@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/booking.dart';
-import '../services/booking_service.dart';
+import '../models/models.dart';
+import '../services/services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
-import 'booking_screen.dart';
+import 'field_detail_screen.dart';
 
 class StatusScreen extends StatefulWidget {
   const StatusScreen({super.key});
-
   @override
   State<StatusScreen> createState() => _StatusScreenState();
 }
@@ -17,29 +16,16 @@ class _StatusScreenState extends State<StatusScreen> {
   bool _loading = true;
 
   @override
-  void initState() {
-    super.initState();
-    _load();
-  }
+  void initState() { super.initState(); _load(); }
 
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final bookings = await BookingService.getMyBookings();
-      if (mounted) setState(() { _bookings = bookings; _loading = false; });
+      final b = await BookingService.getMyBookings();
+      if (mounted) setState(() { _bookings = b; _loading = false; });
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
-  }
-
-  String _fmtPrice(int p) {
-    final s = p.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if ((s.length - i) % 3 == 0 && i != 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return buf.toString();
   }
 
   @override
@@ -77,60 +63,54 @@ class _StatusScreenState extends State<StatusScreen> {
           const Text('Belum Ada Booking',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 8),
-          const Text('Riwayat booking Anda akan\nmuncul di sini setelah melakukan reservasi',
+          const Text('Riwayat booking Anda akan muncul di sini',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5)),
-          const SizedBox(height: 28),
-          PrimaryButton(
-            label: 'Booking Sekarang', icon: Icons.add_rounded, width: 200,
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BookingScreen())),
-          ),
         ]),
       ),
     );
   }
 
-  Widget _buildCard(Booking booking) {
-    final cfg = _statusConfig(booking.status);
+  Widget _buildCard(Booking b) {
+    final cfg = _statusCfg(b.status);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Text(booking.bookingCode,
+            Text(b.bookingCode,
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
             const Spacer(),
             StatusChip(label: cfg.$1, color: cfg.$2, bgColor: cfg.$3, icon: cfg.$4),
           ]),
           const SizedBox(height: 10),
-          Text('Field #${booking.fieldId}',
+          Text(b.field?.name ?? 'Lapangan',
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
 
           // Progress stepper
-          const SizedBox(height: 10),
           Row(children: [
-            _stepIcon(Icons.receipt_long_outlined, 'Dipesan', true),
-            _stepLine(booking.status != BookingStatus.pending),
-            _stepIcon(Icons.payments_outlined, 'Bayar', booking.status != BookingStatus.pending),
-            _stepLine(booking.status == BookingStatus.approved),
+            _stepIcon(Icons.receipt_long_outlined, 'Booking', true),
+            _stepLine(b.status != BookingStatus.pending),
+            _stepIcon(Icons.payments_outlined, 'Bayar', b.status != BookingStatus.pending),
+            _stepLine(b.status == BookingStatus.approved),
             _stepIcon(
-              booking.status == BookingStatus.approved ? Icons.check_circle_outline_rounded
-                  : booking.status == BookingStatus.rejected ? Icons.cancel_outlined
+              b.status == BookingStatus.approved ? Icons.check_circle_outline_rounded
+                  : b.status == BookingStatus.rejected ? Icons.cancel_outlined
                   : Icons.hourglass_empty_rounded,
-              booking.status == BookingStatus.approved ? 'Disetujui'
-                  : booking.status == BookingStatus.rejected ? 'Ditolak' : 'Menunggu',
-              booking.status != BookingStatus.pending,
+              b.status == BookingStatus.approved ? 'Disetujui'
+                  : b.status == BookingStatus.rejected ? 'Ditolak' : 'Menunggu',
+              b.status != BookingStatus.pending,
               color: cfg.$2,
             ),
           ]),
           const SizedBox(height: 12),
           const Divider(height: 1),
           const SizedBox(height: 4),
-
-          _infoTile(Icons.calendar_today_outlined, booking.formattedDate),
-          _infoTile(Icons.schedule_outlined, '${booking.startTime} – ${booking.endTime} · ${booking.durationHours} jam'),
-          _infoTile(Icons.payments_outlined, 'Rp ${_fmtPrice(booking.totalPrice)}', valueColor: AppColors.primary),
+          _infoTile(Icons.calendar_today_outlined, b.formattedDate),
+          _infoTile(Icons.schedule_outlined, '${b.startTime} – ${b.endTime}'),
+          _infoTile(Icons.people_outline_rounded, '${b.personCount} orang'),
+          _infoTile(Icons.payments_outlined, formatPrice(b.totalPrice), valueColor: AppColors.primary),
         ]),
       ),
     );
@@ -167,7 +147,7 @@ class _StatusScreenState extends State<StatusScreen> {
     );
   }
 
-  (String, Color, Color, IconData) _statusConfig(BookingStatus s) {
+  (String, Color, Color, IconData) _statusCfg(BookingStatus s) {
     switch (s) {
       case BookingStatus.pending:
         return ('Menunggu', AppColors.warning, AppColors.warningBg, Icons.hourglass_empty_rounded);

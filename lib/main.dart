@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'services/auth_service.dart';
+import 'services/services.dart';
 import 'theme/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
@@ -30,7 +30,6 @@ class EReservLapApp extends StatelessWidget {
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -51,12 +50,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
-      // Cek apakah user sudah login
-      final destination = AuthService.isLoggedIn
-          ? const MainNavigation()
-          : const LoginScreen();
+      final dest = AuthService.isLoggedIn ? const MainNavigation() : const LoginScreen();
       Navigator.of(context).pushReplacement(PageRouteBuilder(
-        pageBuilder: (_, __, ___) => destination,
+        pageBuilder: (_, __, ___) => dest,
         transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
         transitionDuration: const Duration(milliseconds: 350),
       ));
@@ -64,10 +60,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+  void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
