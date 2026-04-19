@@ -106,4 +106,8 @@ class AppTheme {
           behavior: SnackBarBehavior.floating,
         ),
       );
+
+  static Gradient? get primaryGradient => null;
+
+  static get primaryStart => null;
 }

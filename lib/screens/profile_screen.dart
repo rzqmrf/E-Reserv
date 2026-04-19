@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../theme/app_theme.dart';
@@ -15,6 +17,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   User? _user;
   bool _loading = true;
+  File? _photoFile;
+  final _picker = ImagePicker();
 
   @override
   void initState() { super.initState(); _load(); }
@@ -22,6 +26,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _load() async {
     final u = await AuthService.getProfile();
     if (mounted) setState(() { _user = u; _loading = false; });
+  }
+
+  Future<void> _pickPhoto() async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 16),
+          const Text('Pilih Foto', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          const SizedBox(height: 16),
+          ListTile(
+            leading: Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 20),
+            ),
+            title: const Text('Kamera', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            subtitle: const Text('Ambil foto baru', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            onTap: () async {
+              Navigator.pop(ctx);
+              final picked = await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+              if (picked != null) setState(() => _photoFile = File(picked.path));
+            },
+          ),
+          ListTile(
+            leading: Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.photo_library_outlined, color: AppColors.primary, size: 20),
+            ),
+            title: const Text('Galeri', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            subtitle: const Text('Pilih dari galeri foto', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            onTap: () async {
+              Navigator.pop(ctx);
+              final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+              if (picked != null) setState(() => _photoFile = File(picked.path));
+            },
+          ),
+          if (_photoFile != null)
+            ListTile(
+              leading: Container(
+                width: 40, height: 40,
+                decoration: BoxDecoration(color: AppColors.errorBg, borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+              ),
+              title: const Text('Hapus Foto', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.error)),
+              onTap: () {
+                Navigator.pop(ctx);
+                setState(() => _photoFile = null);
+              },
+            ),
+          const SizedBox(height: 16),
+        ]),
+      ),
+    );
   }
 
   Future<void> _logout() async {
@@ -74,14 +137,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
       color: AppColors.white,
       padding: const EdgeInsets.all(24),
       child: Column(children: [
-        Container(
-          width: 80, height: 80,
-          decoration: const BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-          child: Center(child: Text(
-            _user?.initials ?? 'U',
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary),
-          )),
-        ),
+        Stack(children: [
+          GestureDetector(
+            onTap: _pickPhoto,
+            child: Container(
+              width: 90, height: 90,
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border, width: 2),
+              ),
+              child: _photoFile != null
+                  ? ClipOval(child: Image.file(_photoFile!, fit: BoxFit.cover, width: 90, height: 90))
+                  : Center(child: Text(
+                      _user?.initials ?? 'U',
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary),
+                    )),
+            ),
+          ),
+          Positioned(
+            bottom: 0, right: 0,
+            child: GestureDetector(
+              onTap: _pickPhoto,
+              child: Container(
+                width: 28, height: 28,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
+              ),
+            ),
+          ),
+        ]),
         const SizedBox(height: 14),
         Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         const SizedBox(height: 4),
@@ -89,6 +178,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (_user?.phone != null && _user!.phone.isNotEmpty) ...[
           const SizedBox(height: 2),
           Text(_user!.phone, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        ],
+        if (_photoFile != null) ...[
+          const SizedBox(height: 14),
+          SizedBox(
+            width: 160,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // TODO: upload foto ke Laravel
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Foto profil berhasil disimpan!'),
+                  backgroundColor: AppColors.success,
+                ));
+              },
+              icon: const Icon(Icons.save_outlined, size: 16),
+              label: const Text('Simpan Foto'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
         ],
       ]),
     );

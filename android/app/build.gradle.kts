@@ -9,8 +9,8 @@ android {
     namespace = "com.example.e_reserv"
 
     // Paksa pakai versi terbaru
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
+    compileSdk = 37
+    buildToolsVersion = "37.0.0"
 
     ndkVersion = flutter.ndkVersion
 
@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId = "com.example.e_reserv"
         minSdk = flutter.minSdkVersion         // sesuaikan kebutuhan
-        targetSdk = 34
+        targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
