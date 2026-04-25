@@ -1,0 +1,20 @@
+Langkah" menjalankan projek dengan menginstall dependencynya
+
+1. pertama pindah direktori yang awalnya flutter-Laravel dengan mengetik cd E_ReservLap_admin (Laravel)
+2. kalua sudah di direktori ketik di terminal composer install kalua gabisa bisa ketik composer update
+3. buat file .env copy isi file .env.example bisa di copy terus dimasukkan ke file yang di buat tadi
+4. terus di terminal ketik php artisan key:generate
+3. masuk ke phpMyAdmin buat database dengan nama terserah kmu misal (db_reserv)
+4. lalu migrate dengan mengetik php artisan migrate kalua gabisa langsung lanjut yang Bawah jalankan
+5. kedua masukkan data seeder dengan mengetik php artisan migrate:fresh --seed
+6. jalankan server menggunakan php artisan serve
+
+
+1. pertama kita pindah direktori, sama kaya yang Laravel dengan cd E-reserve yang sebelumnya di direktori flutter-laravel (flutter)
+2. lalu ketik flutter pub get
+3. jalankan di terminal flutter run
+
+selamat mencobaaa!!!
+jika error bisa tanya orang yang buat
+
+terus yang kalau mau login tidak perlu register bisa di lihat di panduan.txt
