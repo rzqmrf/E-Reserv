@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class Field {
   final int id;
   final String name;
@@ -26,38 +29,45 @@ class Field {
   });
 
   factory Field.fromJson(Map<String, dynamic> json) {
-    // Handle image path dari Laravel (menambahkan prefix /storage/)
-    String? fullImageUrl = json['foto_lapangan'] as String?;
+    String? fullImageUrl = json['foto_lapangan'];
     if (fullImageUrl != null && !fullImageUrl.startsWith('http')) {
       fullImageUrl = 'http://localhost:8000/storage/$fullImageUrl';
     }
 
     return Field(
-      id: (json['id'] as int?) ?? 0,
-      name: (json['name'] as String?) ?? 'Tanpa Nama',
-      category: (json['type']?.toString()) ?? 'Lainnya',
-      locationType: (json['location_type']?.toString()) ?? 'Indoor',
+      id: json['id'] ?? 0,
+      name: json['name'] ?? 'Tanpa Nama',
+      category: json['type']?.toString() ?? 'Lainnya',
+      locationType: json['location_type']?.toString() ?? 'Indoor',
       pricePerHour: (json['price'] is num) ? (json['price'] as num).toInt() : int.tryParse(json['price']?.toString() ?? '0') ?? 0,
-      capacity: (json['capacity'] as int?) ?? 10,
+      capacity: json['capacity'] ?? 10,
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
-      reviewCount: (json['review_count'] as int?) ?? 0,
+      reviewCount: json['review_count'] ?? 0,
       isAvailable: json['status'] == 'available' || json['status'] == 1,
       imageUrl: fullImageUrl,
-      description: (json['description'] as String?) ?? '',
+      description: json['description'] ?? '',
     );
   }
+}
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'category': category,
-        'location_type': locationType,
-        'price_per_hour': pricePerHour,
-        'capacity': capacity,
-        'rating': rating,
-        'review_count': reviewCount,
-        'is_available': isAvailable,
-        'image_url': imageUrl,
-        'description': description,
-      };
+void main() async {
+  print('Fetching from API...');
+  var response = await http.get(Uri.parse('http://localhost:8000/api/fields'));
+  print('Status: \${response.statusCode}');
+  
+  var res = jsonDecode(response.body);
+  List data = res is List ? res : res['data'];
+  
+  print('Data length: \${data.length}');
+  
+  for (var item in data) {
+    try {
+      Field f = Field.fromJson(item);
+      print('Parsed: \${f.name}');
+    } catch (e, st) {
+      print("Error parsing item \${item['id']}: \$e");
+      print(st);
+    }
+  }
+  print('Done.');
 }

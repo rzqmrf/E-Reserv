@@ -2,7 +2,7 @@
 // auth_service.dart
 // ============================================================
 
-import '../models/user.dart';
+import '../models/models.dart';
 import 'api_service.dart';
 
 class AuthService {
@@ -73,7 +73,7 @@ class AuthService {
   static Future<User?> getProfile() async {
     try {
       final res = await ApiService.get('/user');
-      final user = User.fromJson(res['data']);
+      final user = User.fromJson(res['data'] ?? res);
 
       // 2. Validasi tambahan saat session check
       if (user.email == 'admin@gmail.com') {

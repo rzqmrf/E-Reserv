@@ -22,6 +22,8 @@ class ApiService {
     _token = null;
   }
 
+  static bool get hasToken => _token != null;
+
   static Map<String, String> get _headers => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

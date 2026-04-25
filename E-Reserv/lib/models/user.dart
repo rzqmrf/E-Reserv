@@ -16,15 +16,18 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'] ?? 0,
-        name: json['name'] ?? 'Pengguna',
-        email: json['email'] ?? '',
-        phone: json['phone'] ?? '-',
-        photoUrl: json['photo_url'],
+        id: (json['id'] as int?) ?? 0,
+        name: (json['name'] as String?) ?? 'Pengguna',
+        email: (json['email'] as String?) ?? '',
+        phone: (json['phone'] as String?) ?? '-',
+        photoUrl: json['photo_url'] as String?,
         createdAt: json['created_at'] != null 
             ? DateTime.parse(json['created_at']) 
             : DateTime.now(),
       );
+      
+  String get initials => name.trim().split(' ')
+      .map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase();
 
   Map<String, dynamic> toJson() => {
         'id': id,

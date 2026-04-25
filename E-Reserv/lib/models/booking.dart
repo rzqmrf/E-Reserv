@@ -13,6 +13,7 @@ class Booking {
   final String endTime;   // HH:mm
   final int durationHours;
   final int totalPrice;
+  final int personCount;
   final BookingStatus status;
   final DateTime createdAt;
 
@@ -30,6 +31,7 @@ class Booking {
     required this.endTime,
     required this.durationHours,
     required this.totalPrice,
+    required this.personCount,
     required this.status,
     required this.createdAt,
     this.user,
@@ -37,16 +39,17 @@ class Booking {
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) => Booking(
-        id: json['id'],
-        bookingCode: json['booking_code'],
-        userId: json['user_id'],
-        fieldId: json['field_id'],
+        id: (json['id'] as int?) ?? 0,
+        bookingCode: (json['booking_code'] as String?) ?? '',
+        userId: (json['user_id'] as int?) ?? 0,
+        fieldId: (json['field_id'] as int?) ?? 0,
         date: DateTime.parse(json['date']),
-        startTime: json['start_time'],
-        endTime: json['end_time'],
-        durationHours: json['duration_hours'],
-        totalPrice: json['total_price'],
-        status: _parseStatus(json['status']),
+        startTime: (json['start_time'] as String?) ?? '00:00',
+        endTime: (json['end_time'] as String?) ?? '00:00',
+        durationHours: (json['duration_hours'] as int?) ?? 1,
+        totalPrice: (json['total_price'] as int?) ?? 0,
+        personCount: (json['person_count'] as int?) ?? 1,
+        status: _parseStatus(json['status'] as String?),
         createdAt: DateTime.parse(json['created_at']),
         user: json['user'] != null ? User.fromJson(json['user']) : null,
         field: json['field'] != null ? Field.fromJson(json['field']) : null,
@@ -62,11 +65,12 @@ class Booking {
         'end_time': endTime,
         'duration_hours': durationHours,
         'total_price': totalPrice,
+        'person_count': personCount,
         'status': status.name,
         'created_at': createdAt.toIso8601String(),
       };
 
-  static BookingStatus _parseStatus(String s) {
+  static BookingStatus _parseStatus(String? s) {
     switch (s) {
       case 'approved': return BookingStatus.approved;
       case 'rejected': return BookingStatus.rejected;

@@ -3,10 +3,18 @@
 // TODO (backend): sambungkan ke endpoint Laravel
 // ============================================================
 
-import '../models/payment.dart';
+import '../models/models.dart';
 import 'api_service.dart';
 
 class PaymentService {
+  // GET Snap Token dari Midtrans via Laravel
+  static Future<String> getSnapToken(int bookingId, int amount) async {
+    final res = await ApiService.post('/payments/store', {
+      'booking_id': bookingId, 
+      'amount': amount
+    });
+    return res['snap_token'];
+  }
   // TODO: POST /api/payments
   static Future<Payment> create({
     required int bookingId,

@@ -16,11 +16,11 @@ class Schedule {
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
-        id: json['id'],
-        fieldId: json['field_id'],
-        dayOfWeek: json['day_of_week'],
-        openTime: json['open_time'],
-        closeTime: json['close_time'],
+        id: (json['id'] as int?) ?? 0,
+        fieldId: (json['field_id'] as int?) ?? 0,
+        dayOfWeek: (json['day_of_week'] as String?) ?? '',
+        openTime: (json['open_time'] as String?) ?? '08:00',
+        closeTime: (json['close_time'] as String?) ?? '22:00',
         isOpen: json['is_open'] == true || json['is_open'] == 1,
       );
 
