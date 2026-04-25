@@ -18,7 +18,7 @@ class FieldController extends Controller
         $schedules = Schedule::all();
 
         return response()->json(
-            Field::all(['id', 'name', 'foto_lapangan', 'type', 'price', 'status', 'description'])
+            Field::all(['id', 'name', 'foto_lapangan', 'type', 'price', 'status', 'description', 'capacity', 'location_type'])
         );
     }
 

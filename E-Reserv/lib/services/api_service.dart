@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Ganti dengan URL Laravel (10.0.2.2 adalah IP localhost komputer untuk Android Emulator)
-  static const String baseUrl = 'http://127.0.0.1:8000/api/login';
+  // Gunakan localhost untuk testing di Web Browser
+  static const String baseUrl = 'http://localhost:8000/api';
 
   static String? _token; // simpan token setelah login
 

@@ -34,7 +34,7 @@ Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
 Route::get('/payments', [PaymentController::class, 'index']);
 
 
-// untuk auth
+// untuk api auth
 Route::post('/login', [AuthController::class, 'apilogin']);
 Route::post('/register', [AuthController::class, 'apiregister']);
 

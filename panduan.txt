@@ -1,0 +1,7 @@
+untuk masuk ke halaman admin yang sudah ada dan tidak bisa register
+email: admin@gmail.com
+password: password
+
+untuk ke halaman user yang sudah ada
+email: user@gmail.com
+password: password

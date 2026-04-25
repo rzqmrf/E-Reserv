@@ -16,12 +16,14 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'],
-        name: json['name'],
-        email: json['email'],
-        phone: json['phone'],
+        id: json['id'] ?? 0,
+        name: json['name'] ?? 'Pengguna',
+        email: json['email'] ?? '',
+        phone: json['phone'] ?? '-',
         photoUrl: json['photo_url'],
-        createdAt: DateTime.parse(json['created_at']),
+        createdAt: json['created_at'] != null 
+            ? DateTime.parse(json['created_at']) 
+            : DateTime.now(),
       );
 
   Map<String, dynamic> toJson() => {

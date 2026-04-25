@@ -15,13 +15,19 @@ class AuthController extends Controller
      */
     public function apilogin(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
         $user = User::where('email', $request->email)->first();
 
+        //cek apakah user adalah admin
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message' => 'Akses ditolak: Admin tidak diperbolehkan login melalui aplikasi ini.'
+            ], 403);
+        }
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Email atau password salah.'

@@ -10,6 +10,7 @@ class Field extends Model
         'name',
         'foto_lapangan',
         'type',
+        'location_type',
         'price',
         'capacity',
         'status',

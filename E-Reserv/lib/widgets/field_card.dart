@@ -55,6 +55,17 @@ class FieldCard extends StatelessWidget {
                         height: 100,
                         width: double.infinity,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 100,
+                          width: double.infinity,
+                          color: bg,
+                          child: Center(
+                            child: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 36),
+                            ),
+                          ),
+                        ),
                       )
                     : Container(
                         height: 100,

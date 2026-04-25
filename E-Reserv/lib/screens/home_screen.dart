@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../theme/app_theme.dart';
@@ -26,7 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final f = await FieldService.getAll();
       if (mounted) setState(() { _fields = f; _loading = false; });
-    } catch (_) {
+    } catch (e) {
+      if (kDebugMode) print('[HOME ERROR] Gagal memuat lapangan: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
