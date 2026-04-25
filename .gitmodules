@@ -1,0 +1,9 @@
+[submodule "Balang"]
+	path = Balang
+	url = https://github.com/IrsyadThenics/Balang.git
+[submodule "E_reservLap_admin"]
+	path = E_reservLap_admin
+	url = https://github.com/IrsyadThenics/E_reservLap_admin.git
+[submodule "E-reserv"]
+	path = E-reserv
+	url = https://github.com/IrsyadThenics/E-reserv.git
