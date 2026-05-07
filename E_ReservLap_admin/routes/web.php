@@ -13,7 +13,7 @@ Route::get('/features', fn() => view('features'));
 // ── Admin Pages ───────────────────────────────────
 Route::prefix('admin')->group(function () {
     Route::get('/', fn() => view('admin.dashboard'));
-    Route::get('/users', fn() => view('admin.users'));
+    Route::get('/analytics', fn() => view('admin.analytics'));
     Route::get('/fields', fn() => view('admin.fields'));
     Route::get('/schedules', fn() => view('admin.schedules'));  // tambah
     Route::get('/bookings', fn() => view('admin.bookings'));    // tambah

@@ -3,7 +3,6 @@ import '../models/models.dart';
 import '../services/services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
-import 'field_detail_screen.dart';
 
 class StatusScreen extends StatefulWidget {
   const StatusScreen({super.key});

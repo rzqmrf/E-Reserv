@@ -72,7 +72,7 @@ class _FieldsScreenState extends State<FieldsScreen> {
                 Row(children: [
                   const Text('Hanya yang tersedia', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                   const Spacer(),
-                  Switch.adaptive(value: _availableOnly, onChanged: (v) => setState(() => _availableOnly = v), activeColor: AppColors.primary),
+                  Switch.adaptive(value: _availableOnly, onChanged: (v) => setState(() => _availableOnly = v), activeTrackColor: AppColors.primary),
                 ]),
               ]),
             ),
@@ -96,6 +96,7 @@ class _FieldsScreenState extends State<FieldsScreen> {
                         ]))
                       : LayoutBuilder(
                           builder: (context, constraints) {
+                            // ignore: unused_local_variable
                             final isWide = constraints.maxWidth > 600;
                             return RefreshIndicator(
                               onRefresh: _load,

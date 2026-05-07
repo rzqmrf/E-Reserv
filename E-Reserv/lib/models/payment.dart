@@ -31,7 +31,7 @@ class Payment {
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
         id: (json['id'] is num) ? (json['id'] as num).toInt() : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
         bookingId: (json['booking_id'] is num) ? (json['booking_id'] as num).toInt() : int.tryParse(json['booking_id']?.toString() ?? '0') ?? 0,
-        amount: (json['amount'] is num) ? (json['amount'] as num).toInt() : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
+        amount: (json['amount'] is num) ? (json['amount'] as num).toInt() : double.tryParse(json['amount']?.toString() ?? '0')?.toInt() ?? 0,
         method: _parseMethod(json['method']?.toString() ?? ''),
         status: _parseStatus(json['status']?.toString() ?? ''),
         proofUrl: json['proof_url'],

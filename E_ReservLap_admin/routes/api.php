@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\SlotController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AnalyticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -17,6 +18,17 @@ Route::apiResource('schedules', ScheduleController::class);
 Route::apiResource('bookings', BookingController::class);
 Route::apiResource('payments', PaymentController::class);
 Route::apiResource('slots', SlotController::class);
+
+// ── Analytics AI Routes ─────────────────────────────
+Route::prefix('analytics')->group(function () {
+    Route::get('/summary',            [AnalyticsController::class, 'summary']);
+    Route::get('/daily-revenue',      [AnalyticsController::class, 'dailyRevenue']);
+    Route::get('/monthly-revenue',    [AnalyticsController::class, 'monthlyRevenue']);
+    Route::get('/field-performance',  [AnalyticsController::class, 'fieldPerformance']);
+    Route::get('/booking-status',     [AnalyticsController::class, 'bookingStatus']);
+    Route::get('/neural-network-data',[AnalyticsController::class, 'neuralNetworkData']);
+    Route::get('/peak-hours',         [AnalyticsController::class, 'peakHours']);
+});
 
 // ── Custom Routes ─────────────────────────────────
 Route::get('fields/{fieldId}/slots', [SlotController::class, 'byFieldAndDate']);

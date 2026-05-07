@@ -37,7 +37,7 @@ class Field {
       name: (json['name'] as String?) ?? 'Tanpa Nama',
       category: (json['type']?.toString()) ?? 'Lainnya',
       locationType: (json['location_type']?.toString()) ?? 'Indoor',
-      pricePerHour: (json['price'] is num) ? (json['price'] as num).toInt() : int.tryParse(json['price']?.toString() ?? '0') ?? 0,
+      pricePerHour: (json['price'] is num) ? (json['price'] as num).toInt() : double.tryParse(json['price']?.toString() ?? '0')?.toInt() ?? 0,
       capacity: (json['capacity'] as int?) ?? 10,
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
       reviewCount: (json['review_count'] as int?) ?? 0,

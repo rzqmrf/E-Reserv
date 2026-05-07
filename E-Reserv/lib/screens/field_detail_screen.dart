@@ -104,7 +104,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
           child: Row(children: [
             const Icon(Icons.calendar_today_outlined, size: 18, color: AppColors.primary),
             const SizedBox(width: 8),
-            Text('Pilih Tanggal:', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+            const Text('Pilih Tanggal:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: _pickDate,
@@ -113,7 +113,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.primaryLight,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.primary.withAlpha((0.3 * 255).toInt())),
                 ),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Text(_fmtDate(_selectedDate),
@@ -200,11 +200,11 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
       textColor = AppColors.primary;
     } else if (isFull) {
       bgColor = AppColors.errorBg;
-      borderColor = AppColors.error.withOpacity(0.3);
+      borderColor = AppColors.error.withAlpha((0.3 * 255).toInt());
       textColor = AppColors.error;
     } else {
       bgColor = AppColors.successBg;
-      borderColor = AppColors.success.withOpacity(0.3);
+      borderColor = AppColors.success.withAlpha((0.3 * 255).toInt());
       textColor = AppColors.success;
     }
 
@@ -244,7 +244,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: pct,
-                  backgroundColor: Colors.white.withOpacity(0.5),
+                  backgroundColor: Colors.white.withAlpha((0.5 * 255).toInt()),
                   valueColor: AlwaysStoppedAnimation<Color>(
                     isFull ? AppColors.error : pct > 0.7 ? AppColors.warning : AppColors.success,
                   ),
@@ -267,7 +267,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
 
   Widget _legendItem(Color bg, Color color, String label) {
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      Container(width: 12, height: 12, decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3), border: Border.all(color: color.withOpacity(0.4)))),
+      Container(width: 12, height: 12, decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3), border: Border.all(color: color.withAlpha((0.4 * 255).toInt())))),
       const SizedBox(width: 4),
       Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
     ]);

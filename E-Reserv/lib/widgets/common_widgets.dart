@@ -40,10 +40,10 @@ class PrimaryButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: onPressed != null ? AppTheme.primaryGradient : null,
-        color: onPressed == null ? AppColors.textHint.withOpacity(0.3) : null,
+        color: onPressed == null ? AppColors.textHint.withAlpha((0.3 * 255).toInt()) : null,
         boxShadow: onPressed != null ? [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withAlpha((0.3 * 255).toInt()),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

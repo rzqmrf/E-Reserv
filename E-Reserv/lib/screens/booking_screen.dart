@@ -147,7 +147,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         decoration: BoxDecoration(
                           color: _personCount > 1 ? AppColors.primaryLight : AppColors.surface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: _personCount > 1 ? AppColors.primary.withOpacity(0.3) : AppColors.border),
+                          border: Border.all(color: _personCount > 1 ? AppColors.primary.withAlpha((0.3 * 255).toInt()) : AppColors.border),
                         ),
                         child: Icon(Icons.remove_rounded, size: 18,
                             color: _personCount > 1 ? AppColors.primary : AppColors.textHint),
@@ -168,7 +168,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                               color: _personCount < widget.slot.remainingCapacity
-                                  ? AppColors.primary.withOpacity(0.3)
+                                  ? AppColors.primary.withAlpha((0.3 * 255).toInt())
                                   : AppColors.border),
                         ),
                         child: Icon(Icons.add_rounded, size: 18,

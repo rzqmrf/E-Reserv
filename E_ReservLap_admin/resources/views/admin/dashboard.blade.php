@@ -75,11 +75,11 @@
             <h3>Akses Cepat</h3>
         </div>
         <div class="quick-links">
-            <a href="/admin/users" class="quick-link">
-                <span class="quick-icon">👤</span>
+            <a href="/admin/analytics" class="quick-link">
+                <span class="quick-icon">🧠</span>
                 <div>
-                    <div class="quick-title">Kelola Users</div>
-                    <div class="quick-desc">Tambah, edit, hapus data pengguna</div>
+                    <div class="quick-title">AI Analisis Keuangan</div>
+                    <div class="quick-desc">Grafik & prediksi Neural Network</div>
                 </div>
                 <span class="quick-arrow">→</span>
             </a>

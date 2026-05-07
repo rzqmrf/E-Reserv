@@ -46,5 +46,3 @@ class BookingService {
   }
 }
 
-// ── Dummy data (hapus setelah backend siap) ──────────────────
-final List<Booking> _dummyBookings = [];

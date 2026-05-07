@@ -1,3 +1,5 @@
+rootProject.name = "e_reserv_android_root"
+
 pluginManagement {
     val flutterSdkPath =
         run {

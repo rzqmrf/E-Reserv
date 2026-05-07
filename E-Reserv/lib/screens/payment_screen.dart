@@ -4,6 +4,7 @@ import '../services/services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'status_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaymentScreen extends StatefulWidget {
   final Booking booking;
@@ -24,13 +25,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (_selectedMethod == PaymentMethod.midtrans) {
         // Dapat snap token dari Laravel → Midtrans
         final snapToken = await PaymentService.getSnapToken(widget.booking.id, widget.booking.totalPrice);
-        // TODO: Buka Midtrans Snap UI di Flutter (memerlukan plugin midtrans_sdk atau webview)
         
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Mengarahkan ke Midtrans... (Simulasi)'),
-          backgroundColor: AppColors.primary,
-        ));
-        await Future.delayed(const Duration(seconds: 2));
+        final url = Uri.parse('https://app.sandbox.midtrans.com/snap/v2/vtweb/$snapToken');
+        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+          throw Exception('Gagal membuka Midtrans');
+        }
       } else {
         // Manual Transfer
         await PaymentService.create(
@@ -38,6 +37,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           amount: widget.booking.totalPrice,
           method: PaymentMethod.manualTransfer,
         );
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Booking berhasil! Silakan upload bukti transfer.'),
           backgroundColor: AppColors.success,
@@ -136,9 +136,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight.withOpacity(0.5),
+                color: AppColors.primaryLight.withAlpha((0.5 * 255).toInt()),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                border: Border.all(color: AppColors.primary.withAlpha((0.1 * 255).toInt())),
               ),
               child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Informasi Rekening:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
@@ -174,14 +174,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.white : AppColors.white.withOpacity(0.6),
+          color: isSelected ? AppColors.white : AppColors.white.withAlpha((0.6 * 255).toInt()),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected ? [
-            BoxShadow(color: AppColors.primary.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))
+            BoxShadow(color: AppColors.primary.withAlpha((0.1 * 255).toInt()), blurRadius: 10, offset: const Offset(0, 4))
           ] : [],
         ),
         child: Row(children: [

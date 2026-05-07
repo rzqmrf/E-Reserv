@@ -60,6 +60,19 @@ class SlotController extends Controller
     {
         $request->validate(['date' => 'required|date']);
 
+        $exists = Slot::where('field_id', $fieldId)->where('date', $request->date)->exists();
+        if (!$exists) {
+            $genRequest = new Request([
+                'field_id' => $fieldId,
+                'date'     => $request->date,
+            ]);
+            try {
+                $this->generate($genRequest);
+            } catch (\Exception $e) {
+                // Ignore errors like no schedule found
+            }
+        }
+
         $slots = Slot::where('field_id', $fieldId)
             ->where('date', $request->date)
             ->orderBy('start_time')

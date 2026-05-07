@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
+                color: AppColors.primary.withAlpha((0.3 * 255).toInt()),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),

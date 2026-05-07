@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
+            color: AppColors.primary.withAlpha((0.2 * 255).toInt()),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.4),
+              color: Colors.white.withAlpha((0.4 * 255).toInt()),
               borderRadius: BorderRadius.circular(100),
             ),
             child: Row(
@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             'Reservasi Lapangan olahraga mudah & cepat',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withAlpha((0.8 * 255).toInt()),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.08),
+                      color: AppColors.primary.withAlpha((0.08 * 255).toInt()),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(f.$1, color: AppColors.primary, size: 18),
@@ -243,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final available = _fields.where((f) => f.isAvailable).length;
     final preview = _fields.take(4).toList();
     final screenWidth = MediaQuery.of(context).size.width;
+    // ignore: unused_local_variable
     final isWide = screenWidth > 600;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

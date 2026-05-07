@@ -47,7 +47,7 @@ class Booking {
         startTime: (json['start_time'] as String?) ?? '00:00',
         endTime: (json['end_time'] as String?) ?? '00:00',
         durationHours: (json['duration_hours'] as int?) ?? 1,
-        totalPrice: (json['total_price'] as int?) ?? 0,
+        totalPrice: (json['total_price'] is num) ? (json['total_price'] as num).toInt() : double.tryParse(json['total_price']?.toString() ?? '0')?.toInt() ?? 0,
         personCount: (json['person_count'] as int?) ?? 1,
         status: _parseStatus(json['status'] as String?),
         createdAt: DateTime.parse(json['created_at']),

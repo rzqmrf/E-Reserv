@@ -202,8 +202,8 @@
 
             <span class="sidebar-label">Manajemen</span>
 
-            <a href="/admin/users" class="sidebar-link {{ request()->is('admin/users') ? 'active' : '' }}">
-                <span class="icon">👤</span> Users
+            <a href="/admin/analytics" class="sidebar-link {{ request()->is('admin/analytics') ? 'active' : '' }}">
+                <span class="icon">🧠</span> AI Analytics
             </a>
 
             <a href="/admin/fields" class="sidebar-link {{ request()->is('admin/fields') ? 'active' : '' }}">
