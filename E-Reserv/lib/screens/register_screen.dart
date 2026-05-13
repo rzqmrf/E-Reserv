@@ -67,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               vertical: 24,
             ),
             child: Column(
-              crossAxisAlignment: isWide ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 10),
                 Center(
@@ -91,13 +91,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
                 Text(
                   'Daftar Akun',
-                  textAlign: isWide ? TextAlign.center : TextAlign.start,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -1),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Buat akun baru untuk mulai reservasi',
-                  textAlign: isWide ? TextAlign.center : TextAlign.start,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 40),
@@ -157,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             labelText: 'Password',
                             prefixIcon: const Icon(Icons.lock_rounded, size: 22),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscure ? Icons.visibility_rounded : Icons.visibility_off_rounded, size: 22),
+                              icon: Icon(_obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 22),
                               onPressed: () => setState(() => _obscure = !_obscure),
                             ),
                           ),
@@ -175,7 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             labelText: 'Konfirmasi Password',
                             prefixIcon: const Icon(Icons.lock_rounded, size: 22),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscureConfirm ? Icons.visibility_rounded : Icons.visibility_off_rounded, size: 22),
+                              icon: Icon(_obscureConfirm ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 22),
                               onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                             ),
                           ),

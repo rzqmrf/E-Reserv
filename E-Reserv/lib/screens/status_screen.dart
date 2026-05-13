@@ -30,7 +30,7 @@ class _StatusScreenState extends State<StatusScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Status Booking'), leading: const BackButton()),
+      appBar: AppBar(title: const Text('Status Booking')),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _bookings.isEmpty

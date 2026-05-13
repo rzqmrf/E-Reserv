@@ -13,13 +13,23 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  late final List<Widget> _screens;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    FieldsScreen(),
-    StatusScreen(),
-    ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeScreen(
+        onNavigateToFields: () => setState(() => _currentIndex = 1),
+        onNavigateToStatus: () => setState(() => _currentIndex = 2),
+      ),
+      const FieldsScreen(),
+      const StatusScreen(),
+      ProfileScreen(
+        onNavigateToStatus: () => setState(() => _currentIndex = 2),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

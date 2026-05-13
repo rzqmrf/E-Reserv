@@ -10,7 +10,9 @@ import 'field_detail_screen.dart';
 import 'status_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onNavigateToFields, this.onNavigateToStatus});
+  final VoidCallback? onNavigateToFields;
+  final VoidCallback? onNavigateToStatus;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -27,8 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final f = await FieldService.getAll();
       if (mounted) setState(() { _fields = f; _loading = false; });
-    } catch (e) {
-      if (kDebugMode) print('[HOME ERROR] Gagal memuat lapangan: $e');
+    } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withAlpha((0.2 * 255).toInt()),
+            color: AppColors.primary.withOpacity(0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -83,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha((0.4 * 255).toInt()),
+              color: Colors.white.withOpacity(0.4),
               borderRadius: BorderRadius.circular(100),
             ),
             child: Row(
@@ -123,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             'Reservasi Lapangan olahraga mudah & cepat',
             style: TextStyle(
-              color: Colors.white.withAlpha((0.8 * 255).toInt()),
+              color: Colors.white.withOpacity(0.8),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -133,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FieldsScreen())),
+                  onPressed: widget.onNavigateToFields ?? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FieldsScreen())),
                   icon: const Icon(Icons.apartment_rounded, size: 20),
                   label: const Text('Lihat'),
                   style: ElevatedButton.styleFrom(
@@ -148,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatusScreen())),
+                  onPressed: widget.onNavigateToStatus ?? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatusScreen())),
                   icon: const Icon(Icons.receipt_long_rounded, size: 20),
                   label: const Text('Riwayat'),
                   style: OutlinedButton.styleFrom(
@@ -214,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha((0.08 * 255).toInt()),
+                      color: AppColors.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(f.$1, color: AppColors.primary, size: 18),
@@ -243,7 +244,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final available = _fields.where((f) => f.isAvailable).length;
     final preview = _fields.take(4).toList();
     final screenWidth = MediaQuery.of(context).size.width;
-    // ignore: unused_local_variable
     final isWide = screenWidth > 600;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Lapangan Tersedia',
           subtitle: _loading ? 'Memuat...' : '$available lapangan siap',
           trailing: TextButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FieldsScreen())),
+            onPressed: widget.onNavigateToFields ?? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FieldsScreen())),
             child: const Text('Lihat Semua', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           ),
         ),

@@ -53,46 +53,56 @@ class _LoginScreenState extends State<LoginScreen> {
               vertical: 24,
             ),
             child: Column(
-              crossAxisAlignment: isWide ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      gradient: AppTheme.primaryGradient,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withAlpha((0.3 * 255).toInt()),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(Icons.sports_soccer_rounded, color: Colors.white, size: 44),
+                Container(
+                  width: 78,
+                  height: 78,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.25),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.sports_soccer_rounded, color: Colors.white, size: 38),
+                ),
+                const SizedBox(height: 28),
+                const Text(
+                  'Selamat Datang !',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 40),
-                Text(
-                  'Selamat Datang!',
-                  textAlign: isWide ? TextAlign.center : TextAlign.start,
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -1),
-                ),
                 const SizedBox(height: 8),
-                Text(
-                  'Masuk ke akun E-ReservLap Anda',
-                  textAlign: isWide ? TextAlign.center : TextAlign.start,
-                  style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                const Text(
+                  'Masuk ke akun E-ReservLap anda',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 32),
                 Container(
-                  padding: const EdgeInsets.all(32),
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.textPrimary.withOpacity(0.05),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                   child: Form(
                     key: _formKey,
@@ -102,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
                           decoration: const InputDecoration(
-                            labelText: 'Alamat Email',
+                            hintText: 'Email',
                             prefixIcon: Icon(Icons.email_rounded, size: 22),
                           ),
                           validator: (v) {
@@ -111,15 +121,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _passCtrl,
                           obscureText: _obscure,
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            hintText: 'Password',
                             prefixIcon: const Icon(Icons.lock_rounded, size: 22),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscure ? Icons.visibility_rounded : Icons.visibility_off_rounded, size: 22),
+                              icon: Icon(_obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 22),
                               onPressed: () => setState(() => _obscure = !_obscure),
                             ),
                           ),
@@ -129,28 +139,32 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {},
-                            child: const Text('Lupa Password?', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                            child: const Text('Lupa Password?'),
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        PrimaryButton(label: 'Masuk Sekarang', icon: Icons.login_rounded, isLoading: _isLoading, onPressed: _login),
+                        const SizedBox(height: 6),
+                        PrimaryButton(label: 'Masuk', icon: Icons.login_rounded, isLoading: _isLoading, onPressed: _login),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text('Belum punya akun? ', style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
                     GestureDetector(
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                      child: const Text('Daftar Gratis', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                      child: const Text('Daftar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)),
                     ),
                   ],
                 ),

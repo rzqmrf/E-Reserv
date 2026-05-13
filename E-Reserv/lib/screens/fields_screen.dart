@@ -45,7 +45,7 @@ class _FieldsScreenState extends State<FieldsScreen> {
   Widget build(BuildContext context) {
     final filtered = _filtered;
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Lapangan'), leading: const BackButton()),
+      appBar: AppBar(title: const Text('Daftar Lapangan')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1200),
