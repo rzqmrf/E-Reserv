@@ -5,6 +5,7 @@
 
 import '../models/models.dart';
 import 'api_service.dart';
+import 'auth_service.dart';
 
 class BookingService {
   // TODO: POST /api/bookings
@@ -20,6 +21,7 @@ class BookingService {
     required int personCount,
   }) async {
     final res = await ApiService.post('/bookings', {
+      'user_id' : AuthService.currentUser?.id,
       'field_id': fieldId,
       'slot_id': slotId,
       'date': date.toIso8601String().split('T').first,
