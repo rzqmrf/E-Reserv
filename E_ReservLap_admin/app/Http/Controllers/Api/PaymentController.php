@@ -21,7 +21,7 @@ class PaymentController extends Controller
         Config::$is3ds        = config('midtrans.is_3ds');
     }
 
-    // Buat transaksi Midtrans atau Manual → kirim snap_token ke Flutter jika Midtrans
+    // midtrans atau manual
     public function store(Request $request)
     {
         $request->validate([
@@ -30,9 +30,9 @@ class PaymentController extends Controller
         ]);
 
         $booking = Booking::with(['user', 'field'])->findOrFail($request->booking_id);
-        $method  = $request->method ?? 'midtrans';
+        $method = $request->input('method', 'midtrans');
 
-        // Buat atau ambil payment yang sudah ada
+        // buat atau get payment
         $payment = Payment::updateOrCreate(
             ['booking_id' => $booking->id],
             [
@@ -44,12 +44,12 @@ class PaymentController extends Controller
 
         $snapToken = null;
 
-        // Jika Midtrans, buat snap token
+        // snap token
         if ($method === 'midtrans') {
             // Parameter Midtrans
             $params = [
                 'transaction_details' => [
-                    'order_id'     => $booking->booking_code . '-' . time(), // Tambah timestamp agar unik jika diulang
+                    'order_id'     => $booking->booking_code . '-' . time(), // timestamp unique
                     'gross_amount' => (int) $booking->total_price,
                 ],
                 'customer_details' => [
@@ -60,8 +60,8 @@ class PaymentController extends Controller
                 'item_details' => [
                     [
                         'id'       => $booking->field->id,
-                        'price'    => (int) $booking->field->price,
-                        'quantity' => 1, // Durasi biasanya sudah include di total_price
+                        'price'    => (int) $booking->total_price, // include durasi langsung gross amount
+                        'quantity' => 1, 
                         'name'     => $booking->field->name,
                     ],
                 ],
@@ -82,37 +82,48 @@ class PaymentController extends Controller
     }
 
 
-    // Webhook dari Midtrans → otomatis update status
+    // Webhook dari Midtrans atau Bypass Lokal → otomatis update status
     public function webhook(Request $request)
     {
-        $notification = new Notification();
+        // Cek input order_id dari request data body dulu jikalau kiriman bypass lokal
+        $orderId = $request->input('order_id');
 
-        $orderId           = $notification->order_id;
-        $transactionStatus = $notification->transaction_status;
-        $fraudStatus       = $notification->fraud_status;
+        // Jikalau data kosong (berarti ini webhook asli Midtrans SDK), ambil dari Notification object bawaan
+        if (empty($orderId)) {
+            $notification = new Notification();
+            $orderId           = $notification->order_id;
+            $transactionStatus = $notification->transaction_status;
+        } else {
+            // Jikalau input order_id ada, berarti kiriman bypass dari Flutter
+            $transactionStatus = $request->input('transaction_status');
+        }
 
-        // Cari booking berdasarkan booking_code
-        $booking = Booking::where('booking_code', $orderId)->firstOrFail();
+        // POTONG BUNTUT TIMESTAMP: Jikalau order_id mengandung tanda '-', potong dan ambil kode depannya aja
+        if (str_contains($orderId, '-')) {
+            $orderId = explode('-', $orderId)[0];
+        }
+
+        // Cari booking berdasarkan booking_code asli yang udah bersih
+        $booking = Booking::where('booking_code', $orderId)->first();
+        
+        if (!$booking) {
+            return response()->json(['message' => 'Kode booking ' . $orderId . ' tidak ditemukan di DB'], 404);
+        }
+
         $payment = Payment::where('booking_id', $booking->id)->firstOrFail();
 
-        if ($transactionStatus == 'capture' && $fraudStatus == 'accept') {
+        if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             $payment->update(['status' => 'paid', 'paid_at' => now()]);
             $booking->update(['status' => 'approved']);
-
-        } elseif ($transactionStatus == 'settlement') {
-            $payment->update(['status' => 'paid', 'paid_at' => now()]);
-            $booking->update(['status' => 'approved']);
-
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $payment->update(['status' => 'failed']);
             $booking->update(['status' => 'rejected']);
-
         } elseif ($transactionStatus == 'pending') {
             $payment->update(['status' => 'unpaid']);
             $booking->update(['status' => 'pending']);
         }
 
-        return response()->json(['message' => 'Webhook berhasil diproses']);
+        return response()->json(['message' => 'Webhook berhasil diproses, status DB terupdate!']);
     }
 
     // Lihat semua payment (untuk dashboard admin)
@@ -129,4 +140,9 @@ class PaymentController extends Controller
         $payment = Payment::with(['booking.user', 'booking.field'])->findOrFail($id);
         return response()->json($payment);
     }
+
+    public function getSnapToken(Request $request)
+    {
+        return $this->store($request);
+    } 
 }

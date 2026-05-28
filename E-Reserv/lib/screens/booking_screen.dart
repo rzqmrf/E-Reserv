@@ -24,7 +24,6 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill nama dari user yang login
     final user = AuthService.currentUser;
     if (user != null) {
       _nameCtrl.text = user.name;
@@ -35,7 +34,7 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void dispose() { _nameCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
 
-  int get _totalPrice => widget.field.pricePerHour * 1; // 1 jam per slot
+  int get _totalPrice => widget.field.pricePerHour * _personCount; // 1 jam per slot
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;

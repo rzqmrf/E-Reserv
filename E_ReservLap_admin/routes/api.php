@@ -41,6 +41,7 @@ Route::get('users/{userId}/bookings', [BookingController::class, 'byUser']);
 Route::post('midtrans/webhook', [PaymentController::class, 'webhook']);
 
 // ── Payments (legacy) ────────────────────────────
+Route::post('/payments/snap-token', [PaymentController::class, 'getSnapToken']);
 Route::post('/payments/store', [PaymentController::class, 'store']);
 Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
 Route::get('/payments', [PaymentController::class, 'index']);

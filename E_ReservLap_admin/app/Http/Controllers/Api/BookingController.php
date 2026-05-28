@@ -26,21 +26,33 @@ class BookingController extends Controller
             'end_time'       => 'required',
             'duration_hours' => 'required|integer|min:1',
             'total_price'    => 'required|integer|min:0',
+            'person_count' => 'required|integer|min:1', // default dan akan berubah FE & BE
         ]);
 
-        $booking = Booking::create([
-            'booking_code'   => 'BK' . strtoupper(Str::random(8)),
-            'user_id'        => $request->user_id,
-            'field_id'       => $request->field_id,
-            'date'           => $request->date,
-            'start_time'     => $request->start_time,
-            'end_time'       => $request->end_time,
-            'duration_hours' => $request->duration_hours,
-            'total_price'    => $request->total_price,
-            'status'         => 'pending',
-        ]);
 
-        return response()->json($booking->load(['user', 'field']), 201);
+        // instansi objek manual agar tidak terfilter masalah fillable    
+        $booking = new \App\Models\Booking();
+        $booking->booking_code   = 'BK' . strtoupper(\Illuminate\Support\Str::random(8));
+        $booking->user_id        = $request->user_id;
+        $booking->field_id       = $request->field_id;
+        $booking->slot_id        = $request->slot_id;
+        $booking->date           = $request->date;
+        $booking->start_time     = $request->start_time;
+        $booking->end_time       = $request->end_time;
+        $booking->duration_hours = $request->duration_hours;
+        $booking->total_price    = $request->total_price;
+        $booking->person_count   = $request->person_count; // DIPAKSA MASUK KE DATABASE COY
+        $booking->status         = 'pending';
+        $booking->save();
+
+        // load relasi field 
+
+        $booking->load('field');
+
+        return response()->json([
+            'success' => true,
+            'data'    => $booking
+        ]);
     }
 
     public function show($id)
