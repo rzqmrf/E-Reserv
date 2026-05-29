@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static String get baseUrl {
-    if (kDebugMode) {
+    if (kDebugMode && !kIsWeb) {
       try {
         if (Platform.isAndroid) return 'http://10.0.2.2:8000/api';
       } catch (e) { /* Bukan mobile/android */ }

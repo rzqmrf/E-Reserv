@@ -35,12 +35,13 @@ class FieldCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppTheme.softShadow,
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
@@ -187,13 +188,13 @@ class FieldCard extends StatelessWidget {
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Lihat',
+                      child: const Text('Detail',
                           style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.bold)),
+                              fontSize: 11, fontWeight: FontWeight.w800)),
                     ),
                   ),
                 ],

@@ -148,12 +148,22 @@ class StepLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(children: [
       Container(
-        width: 24, height: 24,
-        decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-        child: Center(child: Text(number, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700))),
+        width: 26, height: 26,
+        decoration: BoxDecoration(
+          gradient: AppTheme.primaryGradient,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withAlpha((0.2 * 255).toInt()),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Center(child: Text(number, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800))),
       ),
-      const SizedBox(width: 10),
-      Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+      const SizedBox(width: 12),
+      Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary, letterSpacing: -0.2)),
     ]);
   }
 }

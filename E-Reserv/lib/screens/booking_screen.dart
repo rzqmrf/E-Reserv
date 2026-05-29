@@ -71,239 +71,422 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Konfirmasi Booking'), leading: const BackButton()),
+      backgroundColor: AppColors.bgPage,
+      appBar: AppBar(
+        title: const Text('Konfirmasi Booking'),
+        backgroundColor: AppColors.bgPage,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Form(
           key: _formKey,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // Detail booking card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(children: [
-                  Row(children: [
-                    Container(
-                      width: 44, height: 44,
-                      decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
-                      child: Center(child: Text(_emoji(widget.field.category), style: const TextStyle(fontSize: 22))),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(widget.field.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                      Text('${widget.field.category} · ${widget.field.locationType}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                    ])),
-                  ]),
-                  const Divider(height: 24),
-                  InfoRow(icon: Icons.calendar_today_outlined, label: 'Tanggal', value: formatDate(widget.date)),
-                  const Divider(height: 1),
-                  InfoRow(icon: Icons.schedule_outlined, label: 'Waktu', value: '${widget.slot.startTime} – $_endTime ($_durationHours jam)'),
-                  const Divider(height: 1),
-                  InfoRow(
-                    icon: Icons.people_outline_rounded,
-                    label: 'Kapasitas Lapangan',
-                    value: '${widget.field.capacity} orang',
-                    valueColor: AppColors.success,
-                  ),
-                  const Divider(height: 1),
-                  InfoRow(icon: Icons.payments_outlined, label: 'Total Harga', value: formatPrice(_totalPrice), valueColor: AppColors.primary),
-                ]),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            const StepLabel(number: '1', label: 'Data Pemesan'),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Nama Lengkap',
-                prefixIcon: Icon(Icons.person_outline_rounded, size: 20, color: AppColors.textHint),
-              ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama wajib diisi' : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _phoneCtrl,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'No. WhatsApp',
-                prefixIcon: Icon(Icons.phone_outlined, size: 20, color: AppColors.textHint),
-              ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Nomor WA wajib diisi' : null,
-            ),
-            const SizedBox(height: 24),
-
-            const StepLabel(number: '2', label: 'Durasi Sewa'),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(children: [
-                  const Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 12),
-                  const Text('Durasi Sewa', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                  const Spacer(),
-                  // Counter
-                  Row(children: [
-                    GestureDetector(
-                      onTap: _durationHours > 1 ? () => setState(() => _durationHours--) : null,
-                      child: Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: _durationHours > 1 ? AppColors.primaryLight : AppColors.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: _durationHours > 1 ? AppColors.primary.withAlpha((0.3 * 255).toInt()) : AppColors.border),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Ticket Overview Card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppTheme.softShadow,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text(
+                              _emoji(widget.field.category),
+                              style: const TextStyle(fontSize: 26),
+                            ),
+                          ),
                         ),
-                        child: Icon(Icons.remove_rounded, size: 18,
-                            color: _durationHours > 1 ? AppColors.primary : AppColors.textHint),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('$_durationHours jam', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                    ),
-                    GestureDetector(
-                      onTap: () => setState(() => _durationHours++),
-                      child: Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.primary.withAlpha((0.3 * 255).toInt())),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.field.name,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${widget.field.category} · ${widget.field.locationType}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: const Icon(Icons.add_rounded, size: 18, color: AppColors.primary),
-                      ),
+                      ],
                     ),
-                  ]),
-                ]),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 6),
+                    InfoRow(
+                      icon: Icons.calendar_today_rounded,
+                      label: 'Tanggal Sewa',
+                      value: formatDate(widget.date),
+                    ),
+                    const Divider(color: AppColors.border, height: 1),
+                    InfoRow(
+                      icon: Icons.schedule_rounded,
+                      label: 'Waktu Mulai',
+                      value: '${widget.slot.startTime.substring(0, 5)} WIB',
+                    ),
+                    const Divider(color: AppColors.border, height: 1),
+                    InfoRow(
+                      icon: Icons.timer_outlined,
+                      label: 'Estimasi Selesai',
+                      value: '$_endTime WIB',
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
 
-            const StepLabel(number: '3', label: 'Jumlah Orang'),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(children: [
-                  const Icon(Icons.people_outline_rounded, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 12),
-                  const Text('Jumlah Orang', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                  const Spacer(),
-                  // Counter
-                  Row(children: [
-                    GestureDetector(
-                      onTap: _personCount > 1 ? () => setState(() => _personCount--) : null,
-                      child: Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: _personCount > 1 ? AppColors.primaryLight : AppColors.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: _personCount > 1 ? AppColors.primary.withAlpha((0.3 * 255).toInt()) : AppColors.border),
+              const SizedBox(height: 24),
+
+              // 2. Form - Data Pemesan
+              const StepLabel(number: '1', label: 'Data Pemesan'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppTheme.softShadow,
+                ),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Nama Lengkap',
+                        prefixIcon: Icon(Icons.person_rounded, size: 20),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama wajib diisi' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneCtrl,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Nomor WhatsApp',
+                        prefixIcon: Icon(Icons.phone_rounded, size: 20),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Nomor WA wajib diisi' : null,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // 3. Selection Sewa - Durasi & Orang
+              const StepLabel(number: '2', label: 'Konfigurasi Sewa'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppTheme.softShadow,
+                ),
+                child: Column(
+                  children: [
+                    // Duration Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.timer_outlined, color: AppColors.primary, size: 22),
+                            SizedBox(width: 10),
+                            Text(
+                              'Durasi Sewa',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Icon(Icons.remove_rounded, size: 18,
-                            color: _personCount > 1 ? AppColors.primary : AppColors.textHint),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('$_personCount', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                    ),
-                    GestureDetector(
-                      onTap: _personCount < widget.slot.remainingCapacity
-                          ? () => setState(() => _personCount++)
-                          : null,
-                      child: Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: _personCount < widget.slot.remainingCapacity ? AppColors.primaryLight : AppColors.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: _personCount < widget.slot.remainingCapacity
-                                  ? AppColors.primary.withAlpha((0.3 * 255).toInt())
-                                  : AppColors.border),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: _durationHours > 1 ? () => setState(() => _durationHours--) : null,
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: _durationHours > 1 ? AppColors.primaryLight : AppColors.bgPage,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: _durationHours > 1
+                                        ? AppColors.primary.withAlpha((0.3 * 255).toInt())
+                                        : AppColors.border,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.remove_rounded,
+                                  size: 20,
+                                  color: _durationHours > 1 ? AppColors.primary : AppColors.textHint,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              child: Text(
+                                '$_durationHours jam',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => setState(() => _durationHours++),
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: AppColors.primary.withAlpha((0.3 * 255).toInt()),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.add_rounded,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Icon(Icons.add_rounded, size: 18,
-                            color: _personCount < widget.slot.remainingCapacity ? AppColors.primary : AppColors.textHint),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+
+                    // Persons Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.people_outline_rounded, color: AppColors.primary, size: 22),
+                            SizedBox(width: 10),
+                            Text(
+                              'Jumlah Orang',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: _personCount > 1 ? () => setState(() => _personCount--) : null,
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: _personCount > 1 ? AppColors.primaryLight : AppColors.bgPage,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: _personCount > 1
+                                        ? AppColors.primary.withAlpha((0.3 * 255).toInt())
+                                        : AppColors.border,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.remove_rounded,
+                                  size: 20,
+                                  color: _personCount > 1 ? AppColors.primary : AppColors.textHint,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              child: Text(
+                                '$_personCount',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: _personCount < widget.slot.remainingCapacity
+                                  ? () => setState(() => _personCount++)
+                                  : null,
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: _personCount < widget.slot.remainingCapacity
+                                      ? AppColors.primaryLight
+                                      : AppColors.bgPage,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: _personCount < widget.slot.remainingCapacity
+                                        ? AppColors.primary.withAlpha((0.3 * 255).toInt())
+                                        : AppColors.border,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  size: 20,
+                                  color: _personCount < widget.slot.remainingCapacity
+                                      ? AppColors.primary
+                                      : AppColors.textHint,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded, size: 14, color: AppColors.textSecondary.withAlpha((0.8 * 255).toInt())),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Maksimal tersedia: ${widget.slot.remainingCapacity} orang untuk jam ini',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // 4. Modern Invoice Receipt Card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight.withAlpha((0.4 * 255).toInt()),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.primary.withAlpha((0.15 * 255).toInt())),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Rincian Biaya Sewa',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ]),
-                ]),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Harga per Jam', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                        Text(
+                          formatPrice(widget.field.pricePerHour),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Durasi Sewa', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                        Text(
+                          '$_durationHours jam',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Jumlah Orang', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                        Text(
+                          '$_personCount orang',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const Divider(),
+                    const SizedBox(height: 14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total Pembayaran',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        Text(
+                          formatPrice(_totalPrice),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text('Maksimal ${widget.slot.remainingCapacity} orang tersisa untuk slot ini',
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-            const SizedBox(height: 16),
 
-            // Summary Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Ringkasan Biaya',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Harga per Jam', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                      Text(formatPrice(widget.field.pricePerHour), style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Durasi Sewa', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                      Text('$_durationHours jam', style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Jumlah Orang', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                      Text('$_personCount orang', style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Total Pembayaran',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                      ),
-                      Text(
-                        formatPrice(_totalPrice),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+              const SizedBox(height: 32),
 
-            const SizedBox(height: 28),
-            PrimaryButton(
-              label: 'Lanjut ke Pembayaran',
-              icon: Icons.arrow_forward_rounded,
-              isLoading: _isLoading,
-              onPressed: _submit,
-            ),
-            const SizedBox(height: 24),
-          ]),
+              // Submit Button
+              PrimaryButton(
+                label: 'Lanjut ke Pembayaran',
+                icon: Icons.arrow_forward_rounded,
+                isLoading: _isLoading,
+                onPressed: _submit,
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

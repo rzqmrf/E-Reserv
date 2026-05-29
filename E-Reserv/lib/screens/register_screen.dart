@@ -107,6 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppColors.border),
+                    boxShadow: AppTheme.premiumShadow,
                   ),
                   child: Form(
                     key: _formKey,

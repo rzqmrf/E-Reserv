@@ -60,11 +60,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 78,
                   height: 78,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    gradient: AppTheme.primaryGradient,
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.25),
+                        color: AppColors.primary.withAlpha((0.25 * 255).toInt()),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -96,13 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppColors.border),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.textPrimary.withOpacity(0.05),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+                    boxShadow: AppTheme.premiumShadow,
                   ),
                   child: Form(
                     key: _formKey,

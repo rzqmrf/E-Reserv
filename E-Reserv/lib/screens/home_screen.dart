@@ -20,6 +20,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Field> _fields = [];
   bool _loading = true;
+  String _selectedCategory = 'Semua';
+
+  static const List<String> _categories = ['Semua', 'Futsal', 'Badminton', 'Basket', 'Voli', 'Tenis Meja', 'Tenis'];
+  
+  static const Map<String, String> _categoryEmojis = {
+    'Semua': '🌐',
+    'Futsal': '⚽',
+    'Badminton': '🏸',
+    'Basket': '🏀',
+    'Voli': '🏐',
+    'Tenis Meja': '🏓',
+    'Tenis': '🎾',
+  };
 
   @override
   void initState() { super.initState(); _load(); }
@@ -54,6 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             _buildFeatures(),
             const SizedBox(height: 24),
+            _buildCategorySelector(),
+            const SizedBox(height: 24),
             _buildFieldsPreview(),
             const SizedBox(height: 32),
           ]),
@@ -68,13 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(24),
+        gradient: AppTheme.primaryGradient,
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withAlpha((0.2 * 255).toInt()),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -208,6 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.border),
+                boxShadow: AppTheme.softShadow,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,11 +256,85 @@ class _HomeScreenState extends State<HomeScreen> {
     ]);
   }
 
+  Widget _buildCategorySelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Kategori Lapangan',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Pilih cabang olahraga favoritmu',
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 44,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: _categories.length,
+            itemBuilder: (ctx, index) {
+              final cat = _categories[index];
+              final isSelected = _selectedCategory == cat;
+              final emoji = _categoryEmojis[cat] ?? '🏟️';
+
+              return GestureDetector(
+                onTap: () => setState(() => _selectedCategory = cat),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: isSelected ? AppTheme.primaryGradient : null,
+                    color: isSelected ? null : AppColors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? Colors.transparent : AppColors.border,
+                      width: 1.2,
+                    ),
+                    boxShadow: isSelected ? AppTheme.premiumShadow : AppTheme.softShadow,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(emoji, style: const TextStyle(fontSize: 15)),
+                      const SizedBox(width: 8),
+                      Text(
+                        cat,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFieldsPreview() {
-    final available = _fields.where((f) => f.isAvailable).length;
-    final preview = _fields.take(4).toList();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > 600;
+    final filtered = _selectedCategory == 'Semua'
+        ? _fields
+        : _fields.where((f) => f.category == _selectedCategory).toList();
+    final available = filtered.where((f) => f.isAvailable).length;
+    final preview = filtered.take(4).toList();
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
@@ -260,6 +350,28 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       if (_loading)
         const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: AppColors.primary)))
+      else if (preview.isEmpty)
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.sports_rounded, size: 48, color: AppColors.textHint.withAlpha((0.5 * 255).toInt())),
+                const SizedBox(height: 12),
+                const Text(
+                  'Belum ada lapangan',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Kategori ini belum memiliki lapangan terdaftar',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        )
       else
         GridView.builder(
           shrinkWrap: true,

@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'dart:io';
+
 class Field {
   final int id;
   final String name;
@@ -29,7 +32,13 @@ class Field {
     // Handle image path dari Laravel (menambahkan prefix /storage/)
     String? fullImageUrl = json['foto_lapangan'] as String?;
     if (fullImageUrl != null && !fullImageUrl.startsWith('http')) {
-      fullImageUrl = 'http://localhost:8000/storage/$fullImageUrl';
+      String host = 'http://localhost:8000';
+      if (kDebugMode && !kIsWeb) {
+        try {
+          if (Platform.isAndroid) host = 'http://10.0.2.2:8000';
+        } catch (_) {}
+      }
+      fullImageUrl = '$host/storage/$fullImageUrl';
     }
 
     return Field(
