@@ -22,13 +22,20 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if (!$user) {
+            return response()->json([
+                'message' => 'Email atau password salah.'
+            ], 401);
+        }
+
         //cek apakah user adalah admin
         if ($user->role === 'admin') {
             return response()->json([
                 'message' => 'Akses ditolak: Admin tidak diperbolehkan login melalui aplikasi ini.'
             ], 403);
         }
-        if (!$user || !Hash::check($request->password, $user->password)) {
+
+        if (!Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Email atau password salah.'
             ], 401);
@@ -53,7 +60,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:6',
         ]);
 
         $user = User::create([

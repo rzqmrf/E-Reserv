@@ -31,9 +31,22 @@ class Slot extends Model
         return $this->hasMany(Booking::class);
     }
 
-    // Hitung sisa kapasitas
+    // Hitung sisa kapasitas (memperhitungkan booking pending dan approved)
     public function getRemainingCapacityAttribute()
     {
-        return $this->capacity - $this->booked_count;
+        $alreadyBooked = Booking::where('field_id', $this->field_id)
+            ->where('date', $this->date)
+            ->where('start_time', '<=', $this->start_time)
+            ->where('end_time', '>=', $this->end_time)
+            ->whereIn('status', ['pending', 'approved'])
+            ->sum('person_count');
+
+        return max(0, $this->capacity - $alreadyBooked);
+    }
+
+    // Override is_available berdasarkan sisa kapasitas
+    public function getIsAvailableAttribute($value)
+    {
+        return $value && $this->remaining_capacity > 0;
     }
 }

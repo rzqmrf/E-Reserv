@@ -18,6 +18,7 @@ class _BookingScreenState extends State<BookingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  int _durationHours = 1;
   int _personCount = 1;
   bool _isLoading = false;
 
@@ -34,7 +35,14 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void dispose() { _nameCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
 
-  int get _totalPrice => widget.field.pricePerHour * _personCount; // 1 jam per slot
+  int get _totalPrice => widget.field.pricePerHour * _durationHours * _personCount;
+
+  String get _endTime {
+    final parts = widget.slot.startTime.split(':');
+    final startHour = int.tryParse(parts.first) ?? 0;
+    final endHour = startHour + _durationHours;
+    return '${endHour.toString().padLeft(2, '0')}:00';
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -45,8 +53,8 @@ class _BookingScreenState extends State<BookingScreen> {
         slotId: widget.slot.id,
         date: widget.date,
         startTime: widget.slot.startTime,
-        endTime: widget.slot.endTime,
-        durationHours: 1,
+        endTime: _endTime,
+        durationHours: _durationHours,
         totalPrice: _totalPrice,
         personCount: _personCount,
       );
@@ -90,16 +98,16 @@ class _BookingScreenState extends State<BookingScreen> {
                   const Divider(height: 24),
                   InfoRow(icon: Icons.calendar_today_outlined, label: 'Tanggal', value: formatDate(widget.date)),
                   const Divider(height: 1),
-                  InfoRow(icon: Icons.schedule_outlined, label: 'Waktu', value: '${widget.slot.startTime} – ${widget.slot.endTime}'),
+                  InfoRow(icon: Icons.schedule_outlined, label: 'Waktu', value: '${widget.slot.startTime} – $_endTime ($_durationHours jam)'),
                   const Divider(height: 1),
                   InfoRow(
                     icon: Icons.people_outline_rounded,
-                    label: 'Sisa Kapasitas',
-                    value: '${widget.slot.remainingCapacity}/${widget.slot.capacity} orang',
+                    label: 'Kapasitas Lapangan',
+                    value: '${widget.field.capacity} orang',
                     valueColor: AppColors.success,
                   ),
                   const Divider(height: 1),
-                  InfoRow(icon: Icons.payments_outlined, label: 'Harga', value: formatPrice(_totalPrice), valueColor: AppColors.primary),
+                  InfoRow(icon: Icons.payments_outlined, label: 'Total Harga', value: formatPrice(_totalPrice), valueColor: AppColors.primary),
                 ]),
               ),
             ),
@@ -127,7 +135,54 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
             const SizedBox(height: 24),
 
-            const StepLabel(number: '2', label: 'Jumlah Orang'),
+            const StepLabel(number: '2', label: 'Durasi Sewa'),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(children: [
+                  const Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 12),
+                  const Text('Durasi Sewa', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  const Spacer(),
+                  // Counter
+                  Row(children: [
+                    GestureDetector(
+                      onTap: _durationHours > 1 ? () => setState(() => _durationHours--) : null,
+                      child: Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: _durationHours > 1 ? AppColors.primaryLight : AppColors.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: _durationHours > 1 ? AppColors.primary.withAlpha((0.3 * 255).toInt()) : AppColors.border),
+                        ),
+                        child: Icon(Icons.remove_rounded, size: 18,
+                            color: _durationHours > 1 ? AppColors.primary : AppColors.textHint),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text('$_durationHours jam', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    ),
+                    GestureDetector(
+                      onTap: () => setState(() => _durationHours++),
+                      child: Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.primary.withAlpha((0.3 * 255).toInt())),
+                        ),
+                        child: const Icon(Icons.add_rounded, size: 18, color: AppColors.primary),
+                      ),
+                    ),
+                  ]),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            const StepLabel(number: '3', label: 'Jumlah Orang'),
             const SizedBox(height: 12),
             Card(
               child: Padding(
@@ -181,6 +236,64 @@ class _BookingScreenState extends State<BookingScreen> {
             const SizedBox(height: 8),
             Text('Maksimal ${widget.slot.remainingCapacity} orang tersisa untuk slot ini',
                 style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            const SizedBox(height: 16),
+
+            // Summary Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Ringkasan Biaya',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Harga per Jam', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      Text(formatPrice(widget.field.pricePerHour), style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Durasi Sewa', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      Text('$_durationHours jam', style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Jumlah Orang', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      Text('$_personCount orang', style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Total Pembayaran',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      ),
+                      Text(
+                        formatPrice(_totalPrice),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 28),
             PrimaryButton(

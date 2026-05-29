@@ -127,29 +127,81 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
         ),
         const Divider(height: 1),
 
-        // Legend
+        // Title Instruction
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
           child: Row(children: [
-            _legendItem(AppColors.successBg, AppColors.success, 'Tersedia'),
-            const SizedBox(width: 16),
-            _legendItem(AppColors.errorBg, AppColors.error, 'Penuh'),
-            const SizedBox(width: 16),
-            _legendItem(AppColors.primaryLight, AppColors.primary, 'Dipilih'),
+            const Icon(Icons.schedule_rounded, size: 18, color: AppColors.primary),
+            const SizedBox(width: 8),
+            const Text('Pilih Jam Mulai:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           ]),
         ),
 
-        // Slots
+        // Slots Grid (Showing all slots, with 'Penuh' indicator for full ones)
         Expanded(
           child: _loading
               ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
               : _slots.isEmpty
                   ? const Center(child: Text('Tidak ada jadwal tersedia', style: TextStyle(color: AppColors.textSecondary)))
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  : GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 2.5,
+                      ),
                       itemCount: _slots.length,
-                      itemBuilder: (ctx, i) => _buildSlotTile(_slots[i]),
+                      itemBuilder: (ctx, i) {
+                        final slot = _slots[i];
+                        final isSelected = _selectedSlot?.id == slot.id;
+                        final isFull = !slot.isAvailable || slot.isFull;
+
+                        Color bgColor;
+                        Color borderColor;
+                        Color textColor;
+
+                        if (isSelected) {
+                          bgColor = AppColors.primary;
+                          borderColor = AppColors.primary;
+                          textColor = AppColors.white;
+                        } else if (isFull) {
+                          bgColor = AppColors.errorBg;
+                          borderColor = AppColors.error.withAlpha((0.3 * 255).toInt());
+                          textColor = AppColors.error;
+                        } else {
+                          bgColor = AppColors.primaryLight;
+                          borderColor = AppColors.primary.withAlpha((0.2 * 255).toInt());
+                          textColor = AppColors.primary;
+                        }
+
+                        return GestureDetector(
+                          onTap: isFull ? null : () => setState(() => _selectedSlot = isSelected ? null : slot),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              color: bgColor,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: borderColor,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                isFull 
+                                    ? '${slot.startTime.substring(0, 5)} (Penuh)'
+                                    : slot.startTime.substring(0, 5),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
         ),
       ]),
@@ -162,9 +214,9 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${_selectedSlot!.startTime} – ${_selectedSlot!.endTime}',
+                    Text('Jam Mulai: ${_selectedSlot!.startTime.substring(0, 5)}',
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                    Text('Sisa ${_selectedSlot!.remainingCapacity} dari ${_selectedSlot!.capacity} orang',
+                    Text('Kapasitas: ${_selectedSlot!.remainingCapacity} orang',
                         style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   ]),
                   Text(formatPrice(field.pricePerHour),
@@ -172,8 +224,8 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                 ]),
                 const SizedBox(height: 12),
                 PrimaryButton(
-                  label: 'Booking Slot Ini',
-                  icon: Icons.calendar_month_rounded,
+                  label: 'Booking Lapangan',
+                  icon: Icons.arrow_forward_rounded,
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => BookingScreen(field: field, slot: _selectedSlot!, date: _selectedDate)),
@@ -183,94 +235,6 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
             )
           : null,
     );
-  }
-
-  Widget _buildSlotTile(Slot slot) {
-    final isSelected = _selectedSlot?.id == slot.id;
-    final isFull = slot.isFull;
-    final pct = slot.capacity > 0 ? slot.bookedCount / slot.capacity : 0.0;
-
-    Color bgColor;
-    Color borderColor;
-    Color textColor;
-
-    if (isSelected) {
-      bgColor = AppColors.primaryLight;
-      borderColor = AppColors.primary;
-      textColor = AppColors.primary;
-    } else if (isFull) {
-      bgColor = AppColors.errorBg;
-      borderColor = AppColors.error.withAlpha((0.3 * 255).toInt());
-      textColor = AppColors.error;
-    } else {
-      bgColor = AppColors.successBg;
-      borderColor = AppColors.success.withAlpha((0.3 * 255).toInt());
-      textColor = AppColors.success;
-    }
-
-    return GestureDetector(
-      onTap: isFull ? null : () => setState(() => _selectedSlot = isSelected ? null : slot),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor, width: isSelected ? 1.5 : 1),
-        ),
-        child: Row(children: [
-          // Waktu
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('${slot.startTime} – ${slot.endTime}',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textColor)),
-            const SizedBox(height: 2),
-            Text(isFull ? 'Penuh' : 'Tersedia',
-                style: TextStyle(fontSize: 11, color: textColor, fontWeight: FontWeight.w500)),
-          ]),
-          const Spacer(),
-          // Kapasitas
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Row(children: [
-              Icon(Icons.people_outline_rounded, size: 14, color: textColor),
-              const SizedBox(width: 4),
-              Text('${slot.bookedCount}/${slot.capacity} orang',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
-            ]),
-            const SizedBox(height: 6),
-            // Progress bar kapasitas
-            SizedBox(
-              width: 100,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: pct,
-                  backgroundColor: Colors.white.withAlpha((0.5 * 255).toInt()),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isFull ? AppColors.error : pct > 0.7 ? AppColors.warning : AppColors.success,
-                  ),
-                  minHeight: 6,
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text('Sisa ${slot.remainingCapacity} slot',
-                style: TextStyle(fontSize: 10, color: textColor)),
-          ]),
-          if (isSelected) ...[
-            const SizedBox(width: 10),
-            const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 20),
-          ],
-        ]),
-      ),
-    );
-  }
-
-  Widget _legendItem(Color bg, Color color, String label) {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Container(width: 12, height: 12, decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3), border: Border.all(color: color.withAlpha((0.4 * 255).toInt())))),
-      const SizedBox(width: 4),
-      Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-    ]);
   }
 
   String _fieldEmoji(String category) {
