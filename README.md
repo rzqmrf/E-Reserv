@@ -36,7 +36,7 @@ E-Reserv/ (Root)
 
 Ikuti langkah-langkah di bawah ini untuk menjalankan proyek ini di lingkungan lokal Anda.
 
-### 1. Setup Backend (Laravel 11)
+### 1. Setup Backend (Laravel 12)
 
 #### Persyaratan Sistem
 * PHP >= 8.2
