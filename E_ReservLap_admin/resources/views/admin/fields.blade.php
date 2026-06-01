@@ -59,7 +59,14 @@
 
                 <div class="form-group">
                     <label class="form-label">Jenis Lapangan</label>
-                    <input type="text" id="type" class="form-input" placeholder="Futsal, Badminton, Basket...">
+                    <select id="type" class="form-input">
+                        <option value="Futsal">Futsal</option>
+                        <option value="Badminton">Badminton</option>
+                        <option value="Basket">Basket</option>
+                        <option value="Voli">Voli</option>
+                        <option value="Tenis Meja">Tenis Meja</option>
+                        <option value="Tenis">Tenis</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -581,9 +588,10 @@
     }
 
     function resetForm() {
-        ['id', 'name', 'type', 'price', 'description'].forEach(id => {
+        ['id', 'name', 'price', 'description'].forEach(id => {
             document.getElementById(id).value = '';
         });
+        document.getElementById('type').value = 'Futsal';
         document.getElementById('status').value = 'available';
         document.getElementById('form-title').textContent = 'Tambah Lapangan Baru';
         clearPhoto();

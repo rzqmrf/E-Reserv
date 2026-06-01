@@ -10,14 +10,23 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static String get baseUrl {
+  static const String _envHost = String.fromEnvironment('API_HOST', defaultValue: '');
+
+  static String get host {
+    if (_envHost.isNotEmpty) return _envHost;
+
     if (kDebugMode && !kIsWeb) {
       try {
-        if (Platform.isAndroid) return 'http://10.0.2.2:8000/api';
-      } catch (e) { /* Bukan mobile/android */ }
+        if (Platform.isAndroid) return 'http://10.0.2.2:8000';
+      } catch (e) {
+        // Bukan mobile/android
+      }
     }
-    return 'http://localhost:8000/api';
+
+    return 'http://localhost:8000';
   }
+
+  static String get baseUrl => '${host.replaceAll(RegExp(r'/$'), '')}/api';
 
   static String? _token; // simpan token setelah login
 

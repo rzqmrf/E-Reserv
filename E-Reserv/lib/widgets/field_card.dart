@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 import 'common_widgets.dart';
+import 'custom_image.dart';
 
 const _emoji = {
   'Futsal': '⚽',
@@ -51,7 +52,7 @@ class FieldCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: field.imageUrl != null && field.imageUrl!.isNotEmpty
-                    ? Image.network(
+                    ? buildCustomImage(
                         field.imageUrl!,
                         height: 100,
                         width: double.infinity,

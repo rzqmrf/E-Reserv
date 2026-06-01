@@ -3,6 +3,7 @@ import '../models/models.dart';
 import '../services/services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import '../widgets/custom_image.dart';
 import 'booking_screen.dart';
 
 class FieldDetailScreen extends StatefulWidget {
@@ -108,7 +109,7 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                   children: [
                     // Field Image or Fallback Emoji
                     field.imageUrl != null && field.imageUrl!.isNotEmpty
-                        ? Image.network(
+                        ? buildCustomImage(
                             field.imageUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(

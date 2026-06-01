@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'dart:io';
+import '../services/api_service.dart';
 
 class Field {
   final int id;
@@ -29,16 +28,18 @@ class Field {
   });
 
   factory Field.fromJson(Map<String, dynamic> json) {
-    // Handle image path dari Laravel (menambahkan prefix /storage/)
-    String? fullImageUrl = json['foto_lapangan'] as String?;
-    if (fullImageUrl != null && !fullImageUrl.startsWith('http')) {
-      String host = 'http://localhost:8000';
-      if (kDebugMode && !kIsWeb) {
-        try {
-          if (Platform.isAndroid) host = 'http://10.0.2.2:8000';
-        } catch (_) {}
+    String? fullImageUrl = json['foto_lapangan']?.toString().trim();
+    if (fullImageUrl != null && fullImageUrl.isNotEmpty) {
+      if (fullImageUrl.startsWith('http')) {
+        // Already a full URL from backend
+      } else {
+        final path = fullImageUrl.startsWith('/') ? fullImageUrl.substring(1) : fullImageUrl;
+        final normalized =
+            path.startsWith('storage/') || path.startsWith('images/')
+                ? path
+                : 'storage/$path';
+        fullImageUrl = '${ApiService.host.replaceAll(RegExp(r'/$'), '')}/$normalized';
       }
-      fullImageUrl = '$host/storage/$fullImageUrl';
     }
 
     return Field(

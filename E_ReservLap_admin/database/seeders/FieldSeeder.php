@@ -12,7 +12,7 @@ class FieldSeeder extends Seeder
         $fields = [
             [
                 'name' => 'Lapangan Futsal International',
-                'foto_lapangan' => 'images/futsal_international.jpg',
+                'foto_lapangan' => 'fields/J5f1BCQDkjHoleFmP6Ggzw0mWSXA2eS58oe6wGhF.png',
                 'type' => 'Futsal',
                 'price' => 150000,
                 'capacity' => 10,
@@ -21,7 +21,7 @@ class FieldSeeder extends Seeder
             ],
             [
                 'name' => 'Lapangan Futsal Standard',
-                'foto_lapangan' => 'images/futsal_standard.jpg',
+                'foto_lapangan' => 'fields/Wb2BL1Z8w4iBEN6ZpZkcWaGEZ1y7o7sl8kc3PGZq.jpg',
                 'type' => 'Futsal',
                 'price' => 100000,
                 'capacity' => 10,
@@ -30,7 +30,7 @@ class FieldSeeder extends Seeder
             ],
             [
                 'name' => 'Lapangan Badminton 1',
-                'foto_lapangan' => 'images/badminton_1.jpg',
+                'foto_lapangan' => 'fields/hJIGkLaki1X9w8e4VeHzJ7BxFMIrZqyYAIU4MdqX.jpg',
                 'type' => 'Badminton',
                 'price' => 50000,
                 'capacity' => 4,
@@ -39,7 +39,7 @@ class FieldSeeder extends Seeder
             ],
             [
                 'name' => 'Lapangan Badminton 2',
-                'foto_lapangan' => 'images/badminton_2.jpg',
+                'foto_lapangan' => 'fields/pZIalRicsa5rNcshzlrf3zoFtSeIl12Tk8RHVXVd.png',
                 'type' => 'Badminton',
                 'price' => 50000,
                 'capacity' => 4,
@@ -48,7 +48,7 @@ class FieldSeeder extends Seeder
             ],
             [
                 'name' => 'Lapangan Basket',
-                'foto_lapangan' => 'images/basket.jpg',
+                'foto_lapangan' => 'fields/p0W53wDWZ3aZda4O8xCNCsajobzCeeYaQjprQyem.jpg',
                 'type' => 'Basket',
                 'price' => 200000,
                 'capacity' => 12,
