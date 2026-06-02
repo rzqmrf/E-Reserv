@@ -196,7 +196,7 @@
     <a href="{{ route('lapangan.slot', $field->id) }}" class="field-item">
         <div class="field-item-img">
             {{-- Menggunakan gambar dinamis jika ada, jika tidak pakai placeholder --}}
-            <img src="{{ $field->gambar }}" alt="{{ $field->name }}" onerror="this.onerror=null;this.src='https://via.placeholder.com/80x80?text=No+Image';">
+            <img src="{{ $field->foto_lapangan ? asset('storage/' . $field->foto_lapangan) : 'https://via.placeholder.com/80x80?text=No+Image' }}" alt="{{ $field->name }}" onerror="this.onerror=null;this.src='https://via.placeholder.com/80x80?text=No+Image';">
         </div>
         <div class="field-item-content">
             <div class="field-item-top">

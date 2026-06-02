@@ -351,7 +351,7 @@
                             'Badminton' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=400',
                             'Basket' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&q=80&w=400',
                         ];
-                        $image = $images[$field->type] ?? 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400';
+                        $image = $field->foto_lapangan ? asset('storage/' . $field->foto_lapangan) : ($images[$field->type] ?? 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400');
                     @endphp
                     <img src="{{ $image }}" alt="{{ $field->name }}">
                     <div class="status-pill {{ $field->status == 'available' ? 'status-available' : 'status-unavailable' }}">
