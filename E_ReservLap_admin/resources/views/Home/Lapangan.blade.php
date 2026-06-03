@@ -195,8 +195,15 @@
     @forelse($lapangans as $field)
     <a href="{{ route('lapangan.slot', $field->id) }}" class="field-item">
         <div class="field-item-img">
-            {{-- Menggunakan gambar dinamis jika ada, jika tidak pakai placeholder --}}
-            <img src="{{ $field->gambar }}" alt="{{ $field->name }}" onerror="this.onerror=null;this.src='https://via.placeholder.com/80x80?text=No+Image';">
+            @php
+                $images = [
+                    'Futsal' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400',
+                    'Badminton' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=400',
+                    'Basket' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&q=80&w=400',
+                ];
+                $image = $field->foto_lapangan ? asset('storage/' . $field->foto_lapangan) : ($images[$field->type] ?? 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400');
+            @endphp
+            <img src="{{ $image }}" alt="{{ $field->name }}">
         </div>
         <div class="field-item-content">
             <div class="field-item-top">
@@ -204,8 +211,8 @@
                     <h4>{{ $field->name }}</h4>
                     <span class="location"><i class="fa-solid fa-location-dot"></i> {{ $field->type }} • Indoor</span>
                 </div>
-                <span class="field-status {{ $field->status == 'active' ? 'status-available' : 'status-full' }}">
-                    {{ $field->status == 'active' ? 'Tersedia' : 'Penuh' }}
+                <span class="field-status {{ $field->status == 'available' ? 'status-available' : 'status-full' }}">
+                    {{ $field->status == 'available' ? 'Tersedia' : 'Penuh' }}
                 </span>
             </div>
             <div class="field-item-bottom">

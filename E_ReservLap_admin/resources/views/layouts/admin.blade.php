@@ -206,6 +206,10 @@
                 <span class="icon">🧠</span> AI Analytics
             </a>
 
+            <a href="/admin/users" class="sidebar-link {{ request()->is('admin/users') ? 'active' : '' }}">
+                <span class="icon">👤</span> Users
+            </a>
+
             <a href="/admin/fields" class="sidebar-link {{ request()->is('admin/fields') ? 'active' : '' }}">
                 <span class="icon">🏟️</span> Fields
             </a>

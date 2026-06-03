@@ -56,7 +56,7 @@ class AuthController extends Controller
 
             // Redirect dinamis berdasarkan role
             if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
+                return redirect()->intended(route('admin'));
             }
 
             return redirect()->intended('/dashboard');
