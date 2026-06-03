@@ -9,7 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 class PaymentScreen extends StatefulWidget {
   final Booking booking;
   final Field field;
-  const PaymentScreen({super.key, required this.booking, required this.field});
+  final Slot? slot;
+  const PaymentScreen({super.key, required this.booking, required this.field, this.slot});
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
 }
@@ -19,6 +20,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _isLoading = false;
 
   Future<void> _pay() async {
+    if (widget.booking.totalPrice == 0) {
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const StatusScreen()),
+        (route) => route.isFirst,
+      );
+      return;
+    }
     setState(() => _isLoading = true);
     try {
       if (_selectedMethod == PaymentMethod.midtrans) {
@@ -98,14 +108,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       child: Center(child: Text(_emoji(widget.field.category), style: const TextStyle(fontSize: 22))),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(widget.field.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                       Text(b.bookingCode, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                     ])),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(8)),
-                      child: const Text('Pending', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.warning)),
+                      decoration: BoxDecoration(
+                        color: b.totalPrice == 0 ? AppColors.successBg : AppColors.warningBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        b.totalPrice == 0 ? 'Approved' : 'Pending',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: b.totalPrice == 0 ? AppColors.success : AppColors.warning,
+                        ),
+                      ),
                     ),
                   ]),
                 ),
@@ -116,57 +136,140 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 const Divider(height: 1),
                 InfoRow(icon: Icons.people_outline_rounded, label: 'Jumlah Orang', value: '${b.personCount} orang'),
                 const Divider(height: 1),
-                InfoRow(icon: Icons.payments_outlined, label: 'Total', value: formatPrice(b.totalPrice), valueColor: AppColors.primary),
+                InfoRow(
+                  icon: Icons.payments_outlined,
+                  label: 'Total',
+                  value: b.totalPrice == 0 ? 'Rp 0 (Gabung Slot)' : formatPrice(b.totalPrice),
+                  valueColor: AppColors.primary,
+                ),
               ]),
             ),
           ),
-          const SizedBox(height: 24),
-
-          // Metode Pembayaran
-          const Text('Pilih Metode Pembayaran',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const SizedBox(height: 12),
           
-          // Midtrans Option
-          _buildMethodCard(
-            method: PaymentMethod.midtrans,
-            title: 'Midtrans (Otomatis)',
-            subtitle: 'Transfer Bank, QRIS, E-Wallet, Kartu Kredit',
-            icon: '💳',
-            isSelected: _selectedMethod == PaymentMethod.midtrans,
-          ),
-          const SizedBox(height: 12),
-          
-          // Manual Option
-          _buildMethodCard(
-            method: PaymentMethod.manualTransfer,
-            title: 'Transfer Manual',
-            subtitle: 'Transfer ke Rekening Bank (Upload Bukti)',
-            icon: '🏦',
-            isSelected: _selectedMethod == PaymentMethod.manualTransfer,
-          ),
-          
-          if (_selectedMethod == PaymentMethod.manualTransfer) ...[
-            const SizedBox(height: 16),
+          if (b.totalPrice == 0) ...[
+            const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight.withAlpha((0.5 * 255).toInt()),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primary.withAlpha((0.1 * 255).toInt())),
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primary.withAlpha((0.15 * 255).toInt())),
               ),
-              child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Informasi Rekening:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                SizedBox(height: 8),
-                Text('Bank BCA: 1234567890\nA.N. E-Reserv Sports', style: TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.5)),
-              ]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Informasi Gabung Slot',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Lapangan ini telah disewa dan dibayar penuh oleh Host ke pemilik lapangan. Anda tidak perlu membayar sewa lagi lewat aplikasi.',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.5),
+                  ),
+                  const SizedBox(height: 14),
+                  const Divider(color: AppColors.border),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Host Lapangan:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.slot?.hostName ?? 'Pemesang Pertama',
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (widget.slot?.hostPhone != null && widget.slot!.hostPhone!.isNotEmpty)
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            String phone = widget.slot!.hostPhone!;
+                            if (phone.startsWith('0')) {
+                              phone = '62${phone.substring(1)}';
+                            }
+                            final url = Uri.parse('https://wa.me/$phone');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          icon: const Icon(Icons.chat_rounded, size: 16),
+                          label: const Text('Hubungi Host'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25D366),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+          ] else ...[
+            const SizedBox(height: 24),
+            // Metode Pembayaran
+            const Text('Pilih Metode Pembayaran',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            const SizedBox(height: 12),
+            
+            // Midtrans Option
+            _buildMethodCard(
+              method: PaymentMethod.midtrans,
+              title: 'Midtrans (Otomatis)',
+              subtitle: 'Transfer Bank, QRIS, E-Wallet, Kartu Kredit',
+              icon: '💳',
+              isSelected: _selectedMethod == PaymentMethod.midtrans,
+            ),
+            const SizedBox(height: 12),
+            
+            // Manual Option
+            _buildMethodCard(
+              method: PaymentMethod.manualTransfer,
+              title: 'Transfer Manual',
+              subtitle: 'Transfer ke Rekening Bank (Upload Bukti)',
+              icon: '🏦',
+              isSelected: _selectedMethod == PaymentMethod.manualTransfer,
+            ),
+            
+            if (_selectedMethod == PaymentMethod.manualTransfer) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight.withAlpha((0.5 * 255).toInt()),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withAlpha((0.1 * 255).toInt())),
+                ),
+                child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Informasi Rekening:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  SizedBox(height: 8),
+                  Text('Bank BCA: 1234567890\nA.N. E-Reserv Sports', style: TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.5)),
+                ]),
+              ),
+            ],
           ],
           
           const SizedBox(height: 32),
           PrimaryButton(
-            label: _selectedMethod == PaymentMethod.midtrans ? 'Bayar Sekarang' : 'Konfirmasi Booking',
-            icon: Icons.payment_rounded,
+            label: b.totalPrice == 0
+                ? 'Selesaikan Pendaftaran'
+                : (_selectedMethod == PaymentMethod.midtrans ? 'Bayar Sekarang' : 'Konfirmasi Booking'),
+            icon: b.totalPrice == 0 ? Icons.check_circle_outline_rounded : Icons.payment_rounded,
             isLoading: _isLoading,
             onPressed: _pay,
           ),

@@ -21,6 +21,7 @@ class _BookingScreenState extends State<BookingScreen> {
   int _durationHours = 1;
   int _personCount = 1;
   bool _isLoading = false;
+  bool _isPrivate = false;
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void dispose() { _nameCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
 
-  int get _totalPrice => widget.field.pricePerHour * _durationHours * _personCount;
+  int get _totalPrice => widget.slot.hostName != null ? 0 : widget.field.pricePerHour * _durationHours;
 
   String get _endTime {
     final parts = widget.slot.startTime.split(':');
@@ -57,9 +58,10 @@ class _BookingScreenState extends State<BookingScreen> {
         durationHours: _durationHours,
         totalPrice: _totalPrice,
         personCount: _personCount,
+        isPrivate: _isPrivate,
       );
       if (!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking, field: widget.field)));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking, field: widget.field, slot: widget.slot)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error));
@@ -234,15 +236,17 @@ class _BookingScreenState extends State<BookingScreen> {
                         Row(
                           children: [
                             GestureDetector(
-                              onTap: _durationHours > 1 ? () => setState(() => _durationHours--) : null,
+                              onTap: widget.slot.hostName != null
+                                  ? null
+                                  : (_durationHours > 1 ? () => setState(() => _durationHours--) : null),
                               child: Container(
                                 width: 34,
                                 height: 34,
                                 decoration: BoxDecoration(
-                                  color: _durationHours > 1 ? AppColors.primaryLight : AppColors.bgPage,
+                                  color: (widget.slot.hostName == null && _durationHours > 1) ? AppColors.primaryLight : AppColors.bgPage,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: _durationHours > 1
+                                    color: (widget.slot.hostName == null && _durationHours > 1)
                                         ? AppColors.primary.withAlpha((0.3 * 255).toInt())
                                         : AppColors.border,
                                   ),
@@ -250,7 +254,7 @@ class _BookingScreenState extends State<BookingScreen> {
                                 child: Icon(
                                   Icons.remove_rounded,
                                   size: 20,
-                                  color: _durationHours > 1 ? AppColors.primary : AppColors.textHint,
+                                  color: (widget.slot.hostName == null && _durationHours > 1) ? AppColors.primary : AppColors.textHint,
                                 ),
                               ),
                             ),
@@ -266,21 +270,25 @@ class _BookingScreenState extends State<BookingScreen> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => setState(() => _durationHours++),
+                              onTap: widget.slot.hostName != null
+                                  ? null
+                                  : () => setState(() => _durationHours++),
                               child: Container(
                                 width: 34,
                                 height: 34,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryLight,
+                                  color: widget.slot.hostName != null ? AppColors.bgPage : AppColors.primaryLight,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: AppColors.primary.withAlpha((0.3 * 255).toInt()),
+                                    color: widget.slot.hostName != null
+                                        ? AppColors.border
+                                        : AppColors.primary.withAlpha((0.3 * 255).toInt()),
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.add_rounded,
                                   size: 20,
-                                  color: AppColors.primary,
+                                  color: widget.slot.hostName != null ? AppColors.textHint : AppColors.primary,
                                 ),
                               ),
                             ),
@@ -387,6 +395,35 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                       ],
                     ),
+                    if (widget.slot.hostName == null) ...[
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      SwitchListTile.adaptive(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Row(
+                          children: [
+                            Icon(Icons.lock_outline_rounded, color: AppColors.primary, size: 22),
+                            SizedBox(width: 10),
+                            Text(
+                              'Sewa Privat (Main Sendiri)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Kunci slot waktu agar orang lain tidak bisa bergabung',
+                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        ),
+                        value: _isPrivate,
+                        activeThumbColor: AppColors.primary,
+                        onChanged: (val) => setState(() => _isPrivate = val),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -440,8 +477,8 @@ class _BookingScreenState extends State<BookingScreen> {
                       children: [
                         const Text('Jumlah Orang', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
                         Text(
-                          '$_personCount orang',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          '$_personCount orang (tidak mempengaruhi harga)',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -461,7 +498,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           ),
                         ),
                         Text(
-                          formatPrice(_totalPrice),
+                          widget.slot.hostName != null ? 'Rp 0 (Gabung Slot)' : formatPrice(_totalPrice),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -479,8 +516,8 @@ class _BookingScreenState extends State<BookingScreen> {
 
               // Submit Button
               PrimaryButton(
-                label: 'Lanjut ke Pembayaran',
-                icon: Icons.arrow_forward_rounded,
+                label: widget.slot.hostName != null ? 'Konfirmasi Bergabung' : 'Lanjut ke Pembayaran',
+                icon: widget.slot.hostName != null ? Icons.group_add_rounded : Icons.arrow_forward_rounded,
                 isLoading: _isLoading,
                 onPressed: _submit,
               ),

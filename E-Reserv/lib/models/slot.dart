@@ -7,6 +7,8 @@ class Slot {
   final int capacity;       // kapasitas maksimal
   final int bookedCount;    // sudah berapa yang booking
   final bool isAvailable;
+  final String? hostName;
+  final String? hostPhone;
 
   Slot({
     required this.id,
@@ -16,7 +18,9 @@ class Slot {
     required this.endTime,
     required this.capacity,
     required this.bookedCount,
-    required this.isAvailable
+    required this.isAvailable,
+    this.hostName,
+    this.hostPhone,
   });
 
   int get remainingCapacity => capacity - bookedCount;
@@ -31,6 +35,8 @@ class Slot {
         capacity: j['capacity'] ?? 10,
         bookedCount: j['booked_count'] ?? 0,
         isAvailable: j['is_available'] == true || j['is_available'] == 1,
+        hostName: j['host_name'],
+        hostPhone: j['host_phone'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -42,5 +48,7 @@ class Slot {
         'capacity': capacity,
         'booked_count': bookedCount,
         'is_available': isAvailable,
+        'host_name': hostName,
+        'host_phone': hostPhone,
       };
 }

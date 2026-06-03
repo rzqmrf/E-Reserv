@@ -65,6 +65,7 @@ class BookingController extends Controller
             'duration_hours' => 'required|integer|min:1',
             'total_price'    => 'required|integer|min:0',
             'person_count'   => 'required|integer|min:1',
+            'is_private'     => 'nullable|boolean',
         ]);
 
         $startTime = \Carbon\Carbon::parse($request->start_time);
@@ -115,7 +116,23 @@ class BookingController extends Controller
 
         // Ambil field untuk kalkulasi total_price otomatis
         $field = \App\Models\Field::findOrFail($request->field_id);
-        $totalPrice = $field->price * $request->duration_hours * $request->person_count;
+
+        // Cek apakah sudah ada booking (Host) di slot pertama
+        $hasHost = Booking::where('slot_id', $slots->first()->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($hasHost) {
+            // Joiner: gratis, langsung approved, tidak bisa privat
+            $totalPrice = 0;
+            $status = 'approved';
+            $isPrivate = false;
+        } else {
+            // Host: bayar sewa lapangan per jam, pending, bisa privat
+            $totalPrice = $field->price * $request->duration_hours;
+            $status = 'pending';
+            $isPrivate = $request->input('is_private', false);
+        }
 
         $booking = new \App\Models\Booking();
         $booking->booking_code   = 'BK' . strtoupper(Str::random(8));
@@ -128,7 +145,8 @@ class BookingController extends Controller
         $booking->duration_hours = $request->duration_hours;
         $booking->total_price    = $totalPrice;
         $booking->person_count   = $request->person_count;
-        $booking->status         = 'pending';
+        $booking->is_private     = $isPrivate;
+        $booking->status         = $status;
         $booking->save();
 
         $booking->load('field');

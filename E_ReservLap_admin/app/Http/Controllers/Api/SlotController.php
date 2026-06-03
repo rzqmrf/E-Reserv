@@ -78,6 +78,13 @@ class SlotController extends Controller
             ->orderBy('start_time')
             ->get()
             ->map(function ($slot) {
+                // Cari booking pertama yang berstatus pending/approved di slot ini (sebagai Host)
+                $hostBooking = \App\Models\Booking::where('slot_id', $slot->id)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->with('user')
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+
                 return [
                     'id'                 => $slot->id,
                     'field_id'           => $slot->field_id,
@@ -88,6 +95,8 @@ class SlotController extends Controller
                     'booked_count'       => $slot->booked_count,
                     'remaining_capacity' => $slot->remaining_capacity,
                     'is_available'       => $slot->is_available && $slot->booked_count < $slot->capacity,
+                    'host_name'          => $hostBooking ? $hostBooking->user->name : null,
+                    'host_phone'         => $hostBooking ? $hostBooking->user->phone : null,
                 ];
             });
 

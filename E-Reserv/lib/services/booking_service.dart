@@ -19,6 +19,7 @@ class BookingService {
     required int durationHours,
     required int totalPrice,
     required int personCount,
+    required bool isPrivate,
   }) async {
     final res = await ApiService.post('/bookings', {
       'user_id' : AuthService.currentUser?.id,
@@ -30,6 +31,7 @@ class BookingService {
       'duration_hours': durationHours,
       'total_price': totalPrice,
       'person_count': personCount,
+      'is_private': isPrivate ? 1 : 0,
     });
     return Booking.fromJson(res['data'] ?? res);
   }
