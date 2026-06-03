@@ -302,6 +302,37 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                 ),
               ),
 
+              // Description Section
+              if (field.description.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Deskripsi Lapangan',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        field.description,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Divider(),
+                    ],
+                  ),
+                ),
+
               // 2. Date Timeline Section
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),

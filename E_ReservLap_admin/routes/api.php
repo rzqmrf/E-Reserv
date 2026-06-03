@@ -57,3 +57,14 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['data' => $request->user()]);
     });
 });
+
+// Route to serve storage files with CORS headers for Flutter Web
+Route::get('/storage/{path}', function ($path) {
+    $path = str_replace('..', '', $path);
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath);
+})->where('path', '.*');
+
