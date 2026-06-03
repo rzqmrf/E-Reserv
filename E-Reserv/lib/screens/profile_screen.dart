@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
-import '../theme/app_theme.dart';
-import '../widgets/common_widgets.dart';
 import 'login_screen.dart';
 import 'status_screen.dart';
 

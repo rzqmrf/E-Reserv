@@ -3,6 +3,8 @@ import '../models/models.dart';
 import '../services/services.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'payment_screen.dart';
 
 class StatusScreen extends StatefulWidget {
   const StatusScreen({super.key});
@@ -109,7 +111,86 @@ class _StatusScreenState extends State<StatusScreen> {
           _infoTile(Icons.calendar_today_outlined, b.formattedDate),
           _infoTile(Icons.schedule_outlined, '${b.startTime} – ${b.endTime}'),
           _infoTile(Icons.people_outline_rounded, '${b.personCount} orang'),
-          _infoTile(Icons.payments_outlined, formatPrice(b.totalPrice), valueColor: AppColors.primary),
+          _infoTile(Icons.payments_outlined, b.totalPrice == 0 ? 'Rp 0 (Gabung Slot)' : formatPrice(b.totalPrice), valueColor: AppColors.primary),
+          if (b.totalPrice == 0 && b.hostName != null) ...[
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Host Lapangan:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      const SizedBox(height: 2),
+                      Text(
+                        b.hostName!,
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                if (b.hostPhone != null && b.hostPhone!.isNotEmpty)
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      String phone = b.hostPhone!;
+                      if (phone.startsWith('0')) {
+                        phone = '62${phone.substring(1)}';
+                      }
+                      final url = Uri.parse('https://wa.me/$phone');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    icon: const Icon(Icons.chat_rounded, size: 14),
+                    label: const Text('Hubungi Host'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF25D366),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+          // Tombol Bayar Sekarang untuk booking pending yang belum dibayar
+          if (b.status == BookingStatus.pending && b.totalPrice > 0) ...[
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (b.field == null) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentScreen(
+                        booking: b,
+                        field: b.field!,
+                      ),
+                    ),
+                  ).then((_) => _load());
+                },
+                icon: const Icon(Icons.payment_rounded, size: 18),
+                label: const Text('Bayar Sekarang'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+          ],
         ]),
       ),
     );

@@ -8,6 +8,8 @@ class Booking extends Model
 {
     public static $skipSlotUpdate = false;
 
+    protected $appends = ['host_name', 'host_phone'];
+
     protected $fillable = [
         'booking_code',
         'user_id',
@@ -19,12 +21,23 @@ class Booking extends Model
         'duration_hours',
         'total_price',
         'person_count',
+        'is_private',
         'status',
     ];
 
     protected static function boot()
     {
         parent::boot();
+
+        static::created(function ($booking) {
+            if (self::$skipSlotUpdate) {
+                return;
+            }
+
+            if ($booking->status === 'approved') {
+                self::updateSlotCapacity($booking, true);
+            }
+        });
 
         static::updated(function ($booking) {
             if (self::$skipSlotUpdate) {
@@ -35,41 +48,87 @@ class Booking extends Model
                 $oldStatus = $booking->getOriginal('status');
                 $newStatus = $booking->status;
 
-                // pending/rejected -> approved
-                if ($oldStatus !== 'approved' && $newStatus === 'approved') {
-                    $slots = Slot::where('field_id', $booking->field_id)
-                        ->where('date', $booking->date)
-                        ->where('start_time', '>=', $booking->start_time)
-                        ->where('end_time', '<=', $booking->end_time)
+                // Sync status of Joiners if Host booking changes status to rejected/pending
+                if ($booking->total_price > 0 && in_array($newStatus, ['rejected', 'pending'])) {
+                    $joiners = self::where('slot_id', $booking->slot_id)
+                        ->where('id', '!=', $booking->id)
+                        ->where('total_price', 0)
+                        ->whereIn('status', ['pending', 'approved'])
                         ->get();
 
-                    foreach ($slots as $slot) {
-                        $slot->booked_count += $booking->person_count;
-                        if ($slot->booked_count >= $slot->capacity) {
-                            $slot->is_available = false;
-                        }
-                        $slot->save();
+                    foreach ($joiners as $joiner) {
+                        $joiner->status = $newStatus;
+                        $joiner->save();
                     }
+                }
+
+                // pending/rejected -> approved
+                if ($oldStatus !== 'approved' && $newStatus === 'approved') {
+                    self::updateSlotCapacity($booking, true);
                 }
 
                 // approved -> rejected/pending
                 if ($oldStatus === 'approved' && $newStatus !== 'approved') {
-                    $slots = Slot::where('field_id', $booking->field_id)
-                        ->where('date', $booking->date)
-                        ->where('start_time', '>=', $booking->start_time)
-                        ->where('end_time', '<=', $booking->end_time)
-                        ->get();
-
-                    foreach ($slots as $slot) {
-                        $slot->booked_count = max(0, $slot->booked_count - $booking->person_count);
-                        if ($slot->booked_count < $slot->capacity) {
-                            $slot->is_available = true;
-                        }
-                        $slot->save();
-                    }
+                    self::updateSlotCapacity($booking, false);
                 }
             }
         });
+
+        static::deleted(function ($booking) {
+            if (self::$skipSlotUpdate) {
+                return;
+            }
+
+            // Sync status of Joiners if Host booking is deleted
+            if ($booking->total_price > 0) {
+                $joiners = self::where('slot_id', $booking->slot_id)
+                    ->where('id', '!=', $booking->id)
+                    ->where('total_price', 0)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->get();
+
+                foreach ($joiners as $joiner) {
+                    $joiner->status = 'rejected';
+                    $joiner->save();
+                }
+            }
+
+            if ($booking->status === 'approved') {
+                self::updateSlotCapacity($booking, false);
+            }
+        });
+    }
+
+    public static function updateSlotCapacity($booking, $isAdding)
+    {
+        $slots = Slot::where('field_id', $booking->field_id)
+            ->where('date', $booking->date)
+            ->where('start_time', '>=', $booking->start_time)
+            ->where('end_time', '<=', $booking->end_time)
+            ->get();
+
+        foreach ($slots as $slot) {
+            if ($isAdding) {
+                if ($booking->is_private) {
+                    $slot->booked_count = $slot->capacity;
+                } else {
+                    $slot->booked_count += $booking->person_count;
+                }
+            } else {
+                if ($booking->is_private) {
+                    $slot->booked_count = 0;
+                } else {
+                    $slot->booked_count = max(0, $slot->booked_count - $booking->person_count);
+                }
+            }
+
+            if ($slot->booked_count >= $slot->capacity) {
+                $slot->is_available = false;
+            } else {
+                $slot->is_available = true;
+            }
+            $slot->save();
+        }
     }
 
     public function user()
@@ -91,5 +150,27 @@ class Booking extends Model
     public function slot()
     {
         return $this->belongsTo(Slot::class);
+    }
+
+    public function getHostNameAttribute()
+    {
+        $hostBooking = self::where('slot_id', $this->slot_id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->with('user')
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        return $hostBooking && $hostBooking->user ? $hostBooking->user->name : null;
+    }
+
+    public function getHostPhoneAttribute()
+    {
+        $hostBooking = self::where('slot_id', $this->slot_id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->with('user')
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        return $hostBooking && $hostBooking->user ? $hostBooking->user->phone : null;
     }
 }

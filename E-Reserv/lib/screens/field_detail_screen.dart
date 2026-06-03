@@ -506,13 +506,26 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          if (_selectedSlot!.hostName != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Host: ${_selectedSlot!.hostName}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            formatPrice(field.pricePerHour),
+                            _selectedSlot!.hostName != null
+                                ? 'Gratis'
+                                : formatPrice(field.pricePerHour),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
@@ -521,9 +534,11 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
-                            '/ jam',
-                            style: TextStyle(
+                          Text(
+                            _selectedSlot!.hostName != null
+                                ? 'Patungan offline'
+                                : '/ jam',
+                            style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
@@ -535,8 +550,8 @@ class _FieldDetailScreenState extends State<FieldDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   PrimaryButton(
-                    label: 'Pesan Sekarang',
-                    icon: Icons.sports_soccer_rounded,
+                    label: _selectedSlot!.hostName != null ? 'Gabung Slot' : 'Pesan Sekarang',
+                    icon: _selectedSlot!.hostName != null ? Icons.group_add_rounded : Icons.sports_soccer_rounded,
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(

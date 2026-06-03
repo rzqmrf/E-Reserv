@@ -14,6 +14,9 @@ class Booking {
   final int durationHours;
   final int totalPrice;
   final int personCount;
+  final bool isPrivate;
+  final String? hostName;
+  final String? hostPhone;
   final BookingStatus status;
   final DateTime createdAt;
 
@@ -32,6 +35,9 @@ class Booking {
     required this.durationHours,
     required this.totalPrice,
     required this.personCount,
+    required this.isPrivate,
+    this.hostName,
+    this.hostPhone,
     required this.status,
     required this.createdAt,
     this.user,
@@ -55,7 +61,9 @@ class Booking {
                     ?.toInt() ??
                 0,
         personCount: int.tryParse(json['person_count']?.toString() ?? '1') ?? 1,
-
+        isPrivate: json['is_private'] == true || json['is_private'] == 1,
+        hostName: json['host_name'],
+        hostPhone: json['host_phone'],
         status: _parseStatus(json['status'] as String?),
         createdAt: json['created_at'] != null
             ? DateTime.parse(json['created_at'])
@@ -75,6 +83,9 @@ class Booking {
         'duration_hours': durationHours,
         'total_price': totalPrice,
         'person_count': personCount,
+        'is_private': isPrivate ? 1 : 0,
+        'host_name': hostName,
+        'host_phone': hostPhone,
         'status': status.name,
         'created_at': createdAt.toIso8601String(),
       };
