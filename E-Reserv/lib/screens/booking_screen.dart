@@ -35,7 +35,7 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void dispose() { _nameCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
 
-  int get _totalPrice => widget.field.pricePerHour * _durationHours * _personCount;
+  int get _totalPrice => widget.field.pricePerHour * _durationHours;
 
   String get _endTime {
     final parts = widget.slot.startTime.split(':');
@@ -440,8 +440,8 @@ class _BookingScreenState extends State<BookingScreen> {
                       children: [
                         const Text('Jumlah Orang', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
                         Text(
-                          '$_personCount orang',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          '$_personCount orang (tidak mempengaruhi harga)',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
