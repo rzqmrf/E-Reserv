@@ -6,6 +6,7 @@ class Field {
   final String category;
   final String locationType;
   final int pricePerHour;
+  final double privatePriceMultiplier;
   final int capacity;
   final double rating;
   final int reviewCount;
@@ -19,6 +20,7 @@ class Field {
     required this.category,
     required this.locationType,
     required this.pricePerHour,
+    this.privatePriceMultiplier = 1.5,
     required this.capacity,
     required this.rating,
     required this.reviewCount,
@@ -41,6 +43,9 @@ class Field {
       category: (json['type']?.toString()) ?? 'Lainnya',
       locationType: (json['location_type']?.toString()) ?? 'Indoor',
       pricePerHour: (json['price'] is num) ? (json['price'] as num).toInt() : double.tryParse(json['price']?.toString() ?? '0')?.toInt() ?? 0,
+      privatePriceMultiplier: (json['private_price_multiplier'] is num)
+          ? (json['private_price_multiplier'] as num).toDouble()
+          : double.tryParse(json['private_price_multiplier']?.toString() ?? '1.5') ?? 1.5,
       capacity: (json['capacity'] as int?) ?? 10,
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
       reviewCount: (json['review_count'] as int?) ?? 0,
@@ -56,6 +61,7 @@ class Field {
         'category': category,
         'location_type': locationType,
         'price_per_hour': pricePerHour,
+        'private_price_multiplier': privatePriceMultiplier,
         'capacity': capacity,
         'rating': rating,
         'review_count': reviewCount,

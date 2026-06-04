@@ -86,22 +86,34 @@ class BookingController extends Controller
             ], 422);
         }
 
+        $requestedPrivate = $request->boolean('is_private');
+
         // Validasi kapasitas untuk setiap slot
         foreach ($slots as $slot) {
-            $alreadyBooked = Booking::where('field_id', $request->field_id)
+            $overlappingBookings = Booking::where('field_id', $request->field_id)
                 ->where('date', $request->date)
                 ->where('start_time', '<=', $slot->start_time)
                 ->where('end_time', '>=', $slot->end_time)
                 ->whereIn('status', ['pending', 'approved'])
-                ->sum('person_count');
+                ->get(['person_count', 'is_private']);
 
-            $remaining = $slot->capacity - $alreadyBooked;
+            $hasPrivateBooking = $overlappingBookings->contains(fn ($booking) => (bool) $booking->is_private);
+            $alreadyBooked = $overlappingBookings->sum('person_count');
+            $remaining = $hasPrivateBooking ? 0 : $slot->capacity - $alreadyBooked;
 
-            if (!$slot->is_available) {
+            if (!$slot->is_available || $hasPrivateBooking) {
                 $formattedStart = \Carbon\Carbon::parse($slot->start_time)->format('H:i');
                 $formattedEnd = \Carbon\Carbon::parse($slot->end_time)->format('H:i');
                 return response()->json([
                     'message' => "Slot jam {$formattedStart} - {$formattedEnd} tidak tersedia."
+                ], 422);
+            }
+
+            if ($requestedPrivate && $alreadyBooked > 0) {
+                $formattedStart = \Carbon\Carbon::parse($slot->start_time)->format('H:i');
+                $formattedEnd = \Carbon\Carbon::parse($slot->end_time)->format('H:i');
+                return response()->json([
+                    'message' => "Slot jam {$formattedStart} - {$formattedEnd} sudah memiliki peserta, tidak bisa disewa privat."
                 ], 422);
             }
 
@@ -129,9 +141,10 @@ class BookingController extends Controller
             $isPrivate = false;
         } else {
             // Host: bayar sewa lapangan per jam, pending, bisa privat
-            $totalPrice = $field->price * $request->duration_hours;
             $status = 'pending';
-            $isPrivate = $request->input('is_private', false);
+            $isPrivate = $requestedPrivate;
+            $privateMultiplier = $isPrivate ? (float) config('services.booking.private_multiplier', 1.5) : 1;
+            $totalPrice = (int) round($field->price * $request->duration_hours * $privateMultiplier);
         }
 
         $booking = new \App\Models\Booking();
@@ -194,7 +207,10 @@ class BookingController extends Controller
             ->get();
 
         foreach ($slots as $slot) {
-            $slot->booked_count += $booking->person_count;
+            $slot->booked_count = $booking->is_private
+                ? $slot->capacity
+                : $slot->booked_count + $booking->person_count;
+
             if ($slot->booked_count >= $slot->capacity) {
                 $slot->is_available = false;
             }
@@ -227,7 +243,10 @@ class BookingController extends Controller
                 ->get();
 
             foreach ($slots as $slot) {
-                $slot->booked_count = max(0, $slot->booked_count - $booking->person_count);
+                $slot->booked_count = $booking->is_private
+                    ? 0
+                    : max(0, $slot->booked_count - $booking->person_count);
+
                 if ($slot->booked_count < $slot->capacity) {
                     $slot->is_available = true;
                 }

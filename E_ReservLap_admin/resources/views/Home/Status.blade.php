@@ -48,6 +48,23 @@
         color: #4a5568;
     }
 
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        margin-bottom: 14px;
+    }
+
+    .status-badge.pending { background: #FFFAF0; color: #DD6B20; }
+    .status-badge.approved { background: #EBF8FF; color: #3182CE; }
+    .status-badge.completed { background: #E6FFFA; color: #2C7A7B; }
+    .status-badge.rejected { background: #FFF5F5; color: #C53030; }
+
     .booking-card-body h4 {
         font-size: 18px;
         margin-bottom: 15px;
@@ -196,6 +213,17 @@
 
 <div class="status-list">
     @forelse($bookings as $booking)
+    @php
+        $bookingEnd = \Carbon\Carbon::parse($booking->date . ' ' . $booking->end_time);
+        $isPending = $booking->status === 'pending';
+        $isApproved = $booking->status === 'approved';
+        $isRejected = $booking->status === 'rejected';
+        $isCompleted = $isApproved && $bookingEnd->isPast();
+        $isPaid = $isApproved || optional($booking->payment)->status === 'paid' || (int) $booking->total_price === 0;
+
+        $statusClass = $isRejected ? 'rejected' : ($isCompleted ? 'completed' : ($isApproved ? 'approved' : 'pending'));
+        $statusLabel = $isRejected ? 'Ditolak' : ($isCompleted ? 'Selesai' : ($isApproved ? 'Sudah Dibayar' : 'Menunggu Pembayaran'));
+    @endphp
     <div class="booking-card">
         <div class="booking-card-header">
             <span class="booking-date">{{ \Carbon\Carbon::parse($booking->date)->isoFormat('LL') }}</span>
@@ -203,18 +231,22 @@
         </div>
         <div class="booking-card-body">
             <h4>{{ $booking->field->name }}</h4>
+            <div class="status-badge {{ $statusClass }}">
+                <i class="fa-solid {{ $isRejected ? 'fa-circle-xmark' : ($isCompleted ? 'fa-circle-check' : ($isApproved ? 'fa-credit-card' : 'fa-clock')) }}"></i>
+                {{ $statusLabel }}
+            </div>
             
             <div class="stepper">
-                <div class="step {{ $booking->status != 'pending' ? 'completed' : 'active' }}">
-                    <div class="step-circle">{!! $booking->status != 'pending' ? '<i class="fa-solid fa-check"></i>' : '1' !!}</div>
+                <div class="step {{ !$isPending && !$isRejected ? 'completed' : ($isPending ? 'active' : '') }}">
+                    <div class="step-circle">{!! !$isPending && !$isRejected ? '<i class="fa-solid fa-check"></i>' : '1' !!}</div>
                     <span class="step-label">Menunggu</span>
                 </div>
-                <div class="step {{ $booking->status == 'paid' || $booking->status == 'completed' ? 'completed' : ($booking->status == 'pending' ? '' : 'active') }}">
-                    <div class="step-circle">{!! $booking->status == 'paid' || $booking->status == 'completed' ? '<i class="fa-solid fa-check"></i>' : '2' !!}</div>
+                <div class="step {{ $isPaid && !$isRejected ? 'completed' : ($isPending ? '' : 'active') }}">
+                    <div class="step-circle">{!! $isPaid && !$isRejected ? '<i class="fa-solid fa-check"></i>' : '2' !!}</div>
                     <span class="step-label">Bayar</span>
                 </div>
-                <div class="step {{ $booking->status == 'completed' ? 'completed' : '' }}">
-                    <div class="step-circle">{!! $booking->status == 'completed' ? '<i class="fa-solid fa-check"></i>' : '3' !!}</div>
+                <div class="step {{ $isCompleted ? 'completed' : ($isApproved ? 'active' : '') }}">
+                    <div class="step-circle">{!! $isCompleted ? '<i class="fa-solid fa-check"></i>' : '3' !!}</div>
                     <span class="step-label">Selesai</span>
                 </div>
             </div>

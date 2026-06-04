@@ -648,7 +648,7 @@
             <div class="toggle-row" id="private-toggle-row">
                 <div class="toggle-label-container">
                     <span class="toggle-title">Sewa Privat (Main Sendiri)</span>
-                    <span class="toggle-subtitle">Kunci slot waktu agar orang lain tidak bisa bergabung</span>
+                    <span class="toggle-subtitle">Kunci slot waktu agar orang lain tidak bisa bergabung. Harga privat {{ rtrim(rtrim(number_format(config('services.booking.private_multiplier', 1.5), 2, ',', '.'), '0'), ',') }}x.</span>
                 </div>
                 <label class="switch">
                     <input type="checkbox" id="private-checkbox" onchange="togglePrivate(this.checked)">
@@ -706,6 +706,10 @@
                 <span>Harga per Jam</span>
                 <span id="receipt-price-per-hour">Rp {{ number_format($field->price, 0, ',', '.') }}</span>
             </div>
+            <div class="receipt-row" id="receipt-private-row" style="display: none;">
+                <span>Harga Privat</span>
+                <span id="receipt-private-price">Rp {{ number_format(round($field->price * config('services.booking.private_multiplier', 1.5)), 0, ',', '.') }}</span>
+            </div>
             <div class="receipt-row">
                 <span>Durasi</span>
                 <span id="receipt-duration">1 jam</span>
@@ -741,6 +745,7 @@
     let paymentMethod = 'midtrans';
     
     const fieldPrice = {{ $field->price }};
+    const privateMultiplier = {{ (float) config('services.booking.private_multiplier', 1.5) }};
     const allSlots = @json($slots);
 
     // Initial load
@@ -877,6 +882,7 @@
 
     function togglePrivate(val) {
         isPrivate = val;
+        updateCheckoutUI();
     }
 
     function setPaymentMethod(method) {
@@ -898,7 +904,8 @@
 
     function updateCheckoutUI() {
         const isJoiner = selectedSlotData ? selectedSlotData.hasHost : false;
-        const price = isJoiner ? 0 : (fieldPrice * durationHours);
+        const pricePerHour = isPrivate ? Math.round(fieldPrice * privateMultiplier) : fieldPrice;
+        const price = isJoiner ? 0 : (pricePerHour * durationHours);
 
         // Format Currency Helper
         const formattedPrice = 'Rp ' + price.toLocaleString('id-ID');
@@ -923,6 +930,8 @@
 
         // Update Modal elements
         document.getElementById('receipt-duration').textContent = `${durationHours} jam`;
+        document.getElementById('receipt-private-row').style.display = (!isJoiner && isPrivate) ? 'flex' : 'none';
+        document.getElementById('receipt-private-price').textContent = 'Rp ' + pricePerHour.toLocaleString('id-ID');
         document.getElementById('receipt-person').textContent = `${personCount} orang (tidak mempengaruhi harga)`;
         document.getElementById('receipt-total-price').textContent = isJoiner ? 'Rp 0 (Gabung Slot)' : formattedPrice;
 
@@ -958,7 +967,7 @@
         }
 
         const isJoiner = selectedSlotData.hasHost;
-        const finalPrice = isJoiner ? 0 : (fieldPrice * durationHours);
+        const finalPrice = isJoiner ? 0 : (Math.round(fieldPrice * (isPrivate ? privateMultiplier : 1)) * durationHours);
 
         const btn = document.getElementById('btn-confirm-checkout');
         const btnText = document.getElementById('btn-text');

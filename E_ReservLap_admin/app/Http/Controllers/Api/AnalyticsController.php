@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Field;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 class AnalyticsController extends Controller
@@ -142,6 +143,62 @@ class AnalyticsController extends Controller
      */
     public function neuralNetworkData()
     {
+        return response()->json($this->buildNeuralNetworkData());
+    }
+
+    public function pythonPrediction()
+    {
+        $history = $this->buildNeuralNetworkData();
+
+        try {
+            $response = Http::timeout(10)->post(
+                rtrim(config('services.ai.url'), '/') . '/predict',
+                ['history' => $history]
+            );
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+        } catch (\Throwable $e) {
+            // Python service is required for AI prediction.
+        }
+
+        return response()->json([
+            'message' => 'Python AI service belum aktif. Jalankan service di ' . config('services.ai.url') . '.',
+            'source' => 'python_ai_service',
+        ], 503);
+    }
+
+    public function aiStatus()
+    {
+        try {
+            $response = Http::timeout(3)->get(rtrim(config('services.ai.url'), '/') . '/health');
+
+            if ($response->successful()) {
+                return response()->json([
+                    'online' => true,
+                    'source' => 'python_ai_service',
+                    'service_url' => config('services.ai.url'),
+                    'detail' => $response->json(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // The UI will show that Python AI is offline.
+        }
+
+        return response()->json([
+            'online' => false,
+            'source' => 'python_ai_service',
+            'service_url' => config('services.ai.url'),
+            'detail' => [
+                'status' => 'offline',
+                'model' => 'Python AI Service',
+            ],
+        ]);
+    }
+
+    private function buildNeuralNetworkData(): array
+    {
         $data = [];
         for ($i = 59; $i >= 0; $i--) {
             $date    = now()->subDays($i);
@@ -160,7 +217,7 @@ class AnalyticsController extends Controller
             ];
         }
 
-        return response()->json($data);
+        return $data;
     }
 
     /**

@@ -13,18 +13,25 @@ class FieldController extends Controller
 {
     public function index()
     {
-
-        $fields = Field::all();
-        $schedules = Schedule::all();
+        $privateMultiplier = (float) config('services.booking.private_multiplier', 1.5);
 
         return response()->json(
             Field::all(['id', 'name', 'foto_lapangan', 'type', 'price', 'status', 'description', 'capacity', 'location_type'])
+                ->map(function ($field) use ($privateMultiplier) {
+                    $field->private_price_multiplier = $privateMultiplier;
+                    $field->private_price = (int) round($field->price * $privateMultiplier);
+                    return $field;
+                })
         );
     }
 
     public function show($id)
     {
         $field = Field::findOrFail($id);
+        $privateMultiplier = (float) config('services.booking.private_multiplier', 1.5);
+        $field->private_price_multiplier = $privateMultiplier;
+        $field->private_price = (int) round($field->price * $privateMultiplier);
+
         return response()->json($field);
     }
 
