@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // ── Web Pages ─────────────────────────────────────
-Route::get('/', fn() => view('home'));
+Route::get('/', fn() => view('home'))->name('home');
 Route::get('/about', fn() => view('about'));
 Route::get('/contact', fn() => view('contact'));
 Route::get('/features', fn() => view('features'));
