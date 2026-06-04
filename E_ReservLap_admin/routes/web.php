@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -64,9 +65,9 @@ Route::middleware('auth')->group(function () {
             return view('Home.Status', compact('bookings'));
         })->name('status.index');
 
-        Route::get('/profile', function() {
-            return view('Home.Profile');
-        })->name('profile.index');
+        Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
         Route::get('/lapangan/{id}/slot', function($id) {
             $field = \App\Models\Field::findOrFail($id);
