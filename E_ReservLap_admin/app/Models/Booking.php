@@ -131,6 +131,40 @@ class Booking extends Model
         }
     }
 
+    public static function canBeApproved($booking): bool
+    {
+        $slots = Slot::where('field_id', $booking->field_id)
+            ->where('date', $booking->date)
+            ->where('start_time', '>=', $booking->start_time)
+            ->where('end_time', '<=', $booking->end_time)
+            ->get();
+
+        foreach ($slots as $slot) {
+            $approvedBookings = self::where('field_id', $booking->field_id)
+                ->where('date', $booking->date)
+                ->where('id', '!=', $booking->id)
+                ->where('start_time', '<=', $slot->start_time)
+                ->where('end_time', '>=', $slot->end_time)
+                ->where('status', 'approved')
+                ->get(['person_count', 'is_private']);
+
+            if ($approvedBookings->contains(fn ($item) => (bool) $item->is_private)) {
+                return false;
+            }
+
+            $approvedCount = $approvedBookings->sum('person_count');
+            if ($booking->is_private && $approvedCount > 0) {
+                return false;
+            }
+
+            if (!$booking->is_private && ($slot->capacity - $approvedCount) < $booking->person_count) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -155,7 +189,7 @@ class Booking extends Model
     public function getHostNameAttribute()
     {
         $hostBooking = self::where('slot_id', $this->slot_id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->where('status', 'approved')
             ->with('user')
             ->orderBy('created_at', 'asc')
             ->first();
@@ -166,7 +200,7 @@ class Booking extends Model
     public function getHostPhoneAttribute()
     {
         $hostBooking = self::where('slot_id', $this->slot_id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->where('status', 'approved')
             ->with('user')
             ->orderBy('created_at', 'asc')
             ->first();

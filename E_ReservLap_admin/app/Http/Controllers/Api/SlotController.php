@@ -78,9 +78,9 @@ class SlotController extends Controller
             ->orderBy('start_time')
             ->get()
             ->map(function ($slot) {
-                // Cari booking pertama yang berstatus pending/approved di slot ini (sebagai Host)
+                // Host baru dianggap aktif setelah booking dibayar/approved.
                 $hostBooking = \App\Models\Booking::where('slot_id', $slot->id)
-                    ->whereIn('status', ['pending', 'approved'])
+                    ->where('status', 'approved')
                     ->with('user')
                     ->orderBy('created_at', 'asc')
                     ->first();

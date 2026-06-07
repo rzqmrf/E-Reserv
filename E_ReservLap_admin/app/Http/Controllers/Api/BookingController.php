@@ -94,7 +94,7 @@ class BookingController extends Controller
                 ->where('date', $request->date)
                 ->where('start_time', '<=', $slot->start_time)
                 ->where('end_time', '>=', $slot->end_time)
-                ->whereIn('status', ['pending', 'approved'])
+                ->where('status', 'approved')
                 ->get(['person_count', 'is_private']);
 
             $hasPrivateBooking = $overlappingBookings->contains(fn ($booking) => (bool) $booking->is_private);
@@ -129,9 +129,9 @@ class BookingController extends Controller
         // Ambil field untuk kalkulasi total_price otomatis
         $field = \App\Models\Field::findOrFail($request->field_id);
 
-        // Cek apakah sudah ada booking (Host) di slot pertama
+        // Cek host aktif hanya dari booking yang sudah dibayar/approved.
         $hasHost = Booking::where('slot_id', $slots->first()->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->where('status', 'approved')
             ->exists();
 
         if ($hasHost) {
@@ -195,6 +195,13 @@ class BookingController extends Controller
 
         if ($booking->status === 'approved') {
             return response()->json(['message' => 'Booking sudah disetujui sebelumnya', 'booking' => $booking]);
+        }
+
+        if (!Booking::canBeApproved($booking)) {
+            return response()->json([
+                'message' => 'Slot sudah penuh atau tidak tersedia untuk booking ini.',
+                'booking' => $booking,
+            ], 422);
         }
 
         // Hindari double processing dari model events

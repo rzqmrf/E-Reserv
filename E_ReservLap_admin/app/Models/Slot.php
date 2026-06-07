@@ -31,14 +31,14 @@ class Slot extends Model
         return $this->hasMany(Booking::class);
     }
 
-    // Hitung sisa kapasitas (memperhitungkan booking pending dan approved)
+    // Hitung sisa kapasitas hanya dari booking yang sudah dibayar/approved.
     public function getRemainingCapacityAttribute()
     {
         $overlappingBookings = Booking::where('field_id', $this->field_id)
             ->where('date', $this->date)
             ->where('start_time', '<=', $this->start_time)
             ->where('end_time', '>=', $this->end_time)
-            ->whereIn('status', ['pending', 'approved'])
+            ->where('status', 'approved')
             ->get(['person_count', 'is_private']);
 
         if ($overlappingBookings->contains(fn ($booking) => (bool) $booking->is_private)) {

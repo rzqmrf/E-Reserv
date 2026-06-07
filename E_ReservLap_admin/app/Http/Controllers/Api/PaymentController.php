@@ -113,6 +113,15 @@ class PaymentController extends Controller
         $payment = Payment::where('booking_id', $booking->id)->firstOrFail();
 
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
+            if (!Booking::canBeApproved($booking)) {
+                $payment->update(['status' => 'failed']);
+                $booking->update(['status' => 'rejected']);
+
+                return response()->json([
+                    'message' => 'Pembayaran tidak bisa dikonfirmasi karena slot sudah penuh.',
+                ], 422);
+            }
+
             $payment->update(['status' => 'paid', 'paid_at' => now()]);
             $booking->update(['status' => 'approved']);
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {

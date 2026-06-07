@@ -81,12 +81,12 @@ Route::middleware('auth')->group(function () {
             $slots->each(function($slot) {
                 $slot->remaining_capacity = $slot->remaining_capacity;
                 $slot->has_host = \App\Models\Booking::where('slot_id', $slot->id)
-                    ->whereIn('status', ['pending', 'approved'])
+                    ->where('status', 'approved')
                     ->exists();
                 // Ambil info nama host jika ada
                 if ($slot->has_host) {
                     $hostBooking = \App\Models\Booking::where('slot_id', $slot->id)
-                        ->whereIn('status', ['pending', 'approved'])
+                        ->where('status', 'approved')
                         ->with('user')
                         ->first();
                     $slot->host_name = $hostBooking && $hostBooking->user ? $hostBooking->user->name : null;
