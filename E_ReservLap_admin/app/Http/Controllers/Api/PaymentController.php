@@ -31,6 +31,15 @@ class PaymentController extends Controller
 
         $booking = Booking::with(['user', 'field'])->findOrFail($request->booking_id);
         $method = $request->input('method', 'midtrans');
+        $expiryMinutes = (int) config('services.booking.payment_expiry_minutes', 10);
+
+        if ($booking->status === 'pending' && $booking->created_at->addMinutes($expiryMinutes)->isPast()) {
+            $booking->update(['status' => 'rejected']);
+
+            return response()->json([
+                'message' => 'Waktu pembayaran sudah habis. Silakan buat booking baru.',
+            ], 422);
+        }
 
         // buat atau get payment
         $payment = Payment::updateOrCreate(
@@ -64,6 +73,11 @@ class PaymentController extends Controller
                         'quantity' => 1, 
                         'name'     => $booking->field->name,
                     ],
+                ],
+                'custom_expiry' => [
+                    'order_time' => now()->format('Y-m-d H:i:s O'),
+                    'expiry_duration' => $expiryMinutes,
+                    'unit' => 'minute',
                 ],
             ];
 

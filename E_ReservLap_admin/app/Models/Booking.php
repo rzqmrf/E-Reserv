@@ -139,6 +139,10 @@ class Booking extends Model
             ->where('end_time', '<=', $booking->end_time)
             ->get();
 
+        if ($slots->isEmpty()) {
+            return false;
+        }
+
         foreach ($slots as $slot) {
             $approvedBookings = self::where('field_id', $booking->field_id)
                 ->where('date', $booking->date)

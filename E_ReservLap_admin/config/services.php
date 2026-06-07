@@ -41,6 +41,7 @@ return [
 
     'booking' => [
         'private_multiplier' => (float) env('PRIVATE_BOOKING_MULTIPLIER', 1.5),
+        'payment_expiry_minutes' => (int) env('PAYMENT_EXPIRY_MINUTES', 10),
     ],
 
 ];

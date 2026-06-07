@@ -61,6 +61,12 @@ Route::middleware('auth')->group(function () {
         })->name('lapangan.index');
 
         Route::get('/status', function() {
+            $expiryMinutes = (int) config('services.booking.payment_expiry_minutes', 10);
+            \App\Models\Booking::where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->where('created_at', '<=', now()->subMinutes($expiryMinutes))
+                ->update(['status' => 'rejected']);
+
             $bookings = \App\Models\Booking::where('user_id', Auth::id())->with('field')->latest()->get();
             return view('Home.Status', compact('bookings'));
         })->name('status.index');
