@@ -196,7 +196,7 @@
     <a href="{{ route('lapangan.slot', $field->id) }}" class="field-item">
         <div class="field-item-img">
             {{-- Menggunakan gambar dinamis jika ada, jika tidak pakai placeholder --}}
-            <img src="{{ $field->foto_lapangan ? asset('storage/' . $field->foto_lapangan) : 'https://via.placeholder.com/80x80?text=No+Image' }}" alt="{{ $field->name }}" onerror="this.onerror=null;this.src='https://via.placeholder.com/80x80?text=No+Image';">
+            <img src="{{ $field->gambar }}" alt="{{ $field->name }}" onerror="this.onerror=null;this.src='https://via.placeholder.com/80x80?text=No+Image';">
         </div>
         <div class="field-item-content">
             <div class="field-item-top">
@@ -204,8 +204,8 @@
                     <h4>{{ $field->name }}</h4>
                     <span class="location"><i class="fa-solid fa-location-dot"></i> {{ $field->type }} • Indoor</span>
                 </div>
-                <span class="field-status {{ $field->status == 'active' ? 'status-available' : 'status-full' }}">
-                    {{ $field->status == 'active' ? 'Tersedia' : 'Penuh' }}
+                <span class="field-status {{ $field->status == 'available' ? 'status-available' : 'status-full' }}">
+                    {{ $field->status == 'available' ? 'Tersedia' : 'Penuh' }}
                 </span>
             </div>
             <div class="field-item-bottom">

@@ -36,7 +36,12 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   void dispose() { _nameCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
 
-  int get _totalPrice => widget.slot.hostName != null ? 0 : widget.field.pricePerHour * _durationHours;
+  int get _pricePerHour {
+    if (!_isPrivate) return widget.field.pricePerHour;
+    return (widget.field.pricePerHour * widget.field.privatePriceMultiplier).round();
+  }
+
+  int get _totalPrice => widget.slot.hostName != null ? 0 : _pricePerHour * _durationHours;
 
   String get _endTime {
     final parts = widget.slot.startTime.split(':');
@@ -416,7 +421,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           ],
                         ),
                         subtitle: const Text(
-                          'Kunci slot waktu agar orang lain tidak bisa bergabung',
+                          'Kunci slot waktu agar orang lain tidak bisa bergabung. Harga privat lebih tinggi.',
                           style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                         ),
                         value: _isPrivate,
@@ -460,6 +465,22 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                       ],
                     ),
+                    if (_isPrivate) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Harga Privat (${widget.field.privatePriceMultiplier}x)',
+                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            formatPrice(_pricePerHour),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

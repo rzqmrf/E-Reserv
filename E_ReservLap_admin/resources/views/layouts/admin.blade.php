@@ -105,21 +105,41 @@
         border-top: 1px solid var(--border);
     }
 
-    .sidebar-footer a {
+    .sidebar-footer a,
+    .sidebar-footer button {
         display: flex;
         align-items: center;
         gap: 10px;
+        width: 100%;
         padding: 10px 14px;
         border-radius: var(--radius-md);
         font-size: 13px;
         font-weight: 600;
         color: var(--text-3);
         transition: background var(--transition), color var(--transition);
+        text-decoration: none;
     }
 
-    .sidebar-footer a:hover {
+    .sidebar-footer button {
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-family: inherit;
+        text-align: left;
+    }
+
+    .sidebar-footer a:hover,
+    .sidebar-footer button:hover {
         background: var(--bg);
         color: var(--text-2);
+    }
+
+    .logout-form {
+        margin: 8px 0 0;
+    }
+
+    .logout-button:hover {
+        color: #dc2626;
     }
 
     /* Main */
@@ -206,6 +226,10 @@
                 <span class="icon">🧠</span> AI Analytics
             </a>
 
+            <a href="/admin/users" class="sidebar-link {{ request()->is('admin/users') ? 'active' : '' }}">
+                <span class="icon">👤</span> Users
+            </a>
+
             <a href="/admin/fields" class="sidebar-link {{ request()->is('admin/fields') ? 'active' : '' }}">
                 <span class="icon">🏟️</span> Fields
             </a>
@@ -231,6 +255,12 @@
             <a href="/">
                 <span>🔙</span> Kembali ke Website
             </a>
+            <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                @csrf
+                <button type="submit" class="logout-button">
+                    <span>Keluar</span>
+                </button>
+            </form>
         </div>
     </aside>
 

@@ -27,6 +27,8 @@ Route::prefix('analytics')->group(function () {
     Route::get('/field-performance',  [AnalyticsController::class, 'fieldPerformance']);
     Route::get('/booking-status',     [AnalyticsController::class, 'bookingStatus']);
     Route::get('/neural-network-data',[AnalyticsController::class, 'neuralNetworkData']);
+    Route::get('/python-prediction',  [AnalyticsController::class, 'pythonPrediction']);
+    Route::get('/ai-status',          [AnalyticsController::class, 'aiStatus']);
     Route::get('/peak-hours',         [AnalyticsController::class, 'peakHours']);
 });
 
@@ -67,4 +69,3 @@ Route::get('/storage/{path}', function ($path) {
     }
     return response()->file($fullPath);
 })->where('path', '.*');
-

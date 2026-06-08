@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'ai' => [
+        'url' => env('AI_SERVICE_URL', 'http://127.0.0.1:5000'),
+    ],
+
+    'booking' => [
+        'private_multiplier' => (float) env('PRIVATE_BOOKING_MULTIPLIER', 1.5),
+        'payment_expiry_minutes' => (int) env('PAYMENT_EXPIRY_MINUTES', 10),
+    ],
+
 ];

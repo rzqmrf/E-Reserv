@@ -1,24 +1,26 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // ── Web Pages ─────────────────────────────────────
-Route::get('/', fn() => view('home'));
+Route::get('/', fn() => view('home'))->name('home');
 Route::get('/about', fn() => view('about'));
 Route::get('/contact', fn() => view('contact'));
 Route::get('/features', fn() => view('features'));
 
 // ── Admin Pages ───────────────────────────────────
-Route::prefix('admin')->group(function () {
-    Route::get('/', fn() => view('admin.dashboard'));
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/', fn() => view('admin.dashboard'))->name('admin.dashboard');
     Route::get('/analytics', fn() => view('admin.analytics'));
     Route::get('/fields', fn() => view('admin.fields'));
-    Route::get('/schedules', fn() => view('admin.schedules'));  // tambah
-    Route::get('/bookings', fn() => view('admin.bookings'));    // tambah
-    Route::get('/payments', fn() => view('admin.payments'));    // tambah
-    Route::get('/slots', fn() => view('admin.slots')); 
+    Route::get('/schedules', fn() => view('admin.schedules'));
+    Route::get('/bookings', fn() => view('admin.bookings'));
+    Route::get('/payments', fn() => view('admin.payments'));
+    Route::get('/slots', fn() => view('admin.slots'));
+    Route::get('/users', fn() => view('admin.users'))->name('admin.users');
 });
 
 
@@ -45,10 +47,6 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('user.home');
     });
 
-    // KHUSUS ADMIN
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/admin/dashboard', [AuthController::class, 'index'])->name('admin.dashboard');
-    });
 
     // KHUSUS USER BIASA
     Route::middleware('role:user')->group(function () {
@@ -63,13 +61,19 @@ Route::middleware('auth')->group(function () {
         })->name('lapangan.index');
 
         Route::get('/status', function() {
+            $expiryMinutes = (int) config('services.booking.payment_expiry_minutes', 10);
+            \App\Models\Booking::where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->where('created_at', '<=', now()->subMinutes($expiryMinutes))
+                ->update(['status' => 'rejected']);
+
             $bookings = \App\Models\Booking::where('user_id', Auth::id())->with('field')->latest()->get();
             return view('Home.Status', compact('bookings'));
         })->name('status.index');
 
-        Route::get('/profile', function() {
-            return view('Home.Profile');
-        })->name('profile.index');
+        Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
         Route::get('/lapangan/{id}/slot', function($id) {
             $field = \App\Models\Field::findOrFail($id);
@@ -78,6 +82,27 @@ Route::middleware('auth')->group(function () {
                 ->orderBy('date')
                 ->orderBy('start_time')
                 ->get();
+
+            // Tambahkan dynamic attribute untuk JSON serialization
+            $slots->each(function($slot) {
+                $slot->remaining_capacity = $slot->remaining_capacity;
+                $slot->has_host = \App\Models\Booking::where('slot_id', $slot->id)
+                    ->where('status', 'approved')
+                    ->exists();
+                // Ambil info nama host jika ada
+                if ($slot->has_host) {
+                    $hostBooking = \App\Models\Booking::where('slot_id', $slot->id)
+                        ->where('status', 'approved')
+                        ->with('user')
+                        ->first();
+                    $slot->host_name = $hostBooking && $hostBooking->user ? $hostBooking->user->name : null;
+                    $slot->host_phone = $hostBooking && $hostBooking->user ? $hostBooking->user->phone : null;
+                } else {
+                    $slot->host_name = null;
+                    $slot->host_phone = null;
+                }
+            });
+
             return view('Home.Slot', compact('field', 'slots'));
         })->name('lapangan.slot');
     });

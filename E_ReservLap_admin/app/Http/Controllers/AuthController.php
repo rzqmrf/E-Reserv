@@ -41,7 +41,10 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return view('auth.Login');
+        return response()
+            ->view('auth.Login')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function login(Request $request)
@@ -56,7 +59,7 @@ class AuthController extends Controller
 
             // Redirect dinamis berdasarkan role
             if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
+                return redirect()->intended(route('admin.dashboard'));
             }
 
             return redirect()->intended('/dashboard');

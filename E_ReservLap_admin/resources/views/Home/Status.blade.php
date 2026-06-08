@@ -48,6 +48,23 @@
         color: #4a5568;
     }
 
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        margin-bottom: 14px;
+    }
+
+    .status-badge.pending { background: #FFFAF0; color: #DD6B20; }
+    .status-badge.approved { background: #EBF8FF; color: #3182CE; }
+    .status-badge.completed { background: #E6FFFA; color: #2C7A7B; }
+    .status-badge.rejected { background: #FFF5F5; color: #C53030; }
+
     .booking-card-body h4 {
         font-size: 18px;
         margin-bottom: 15px;
@@ -132,6 +149,38 @@
         font-weight: 700;
     }
 
+    .booking-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .btn-pay {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 16px;
+        background: var(--primary);
+        color: var(--white);
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .btn-pay:active {
+        transform: scale(0.98);
+    }
+
+    .btn-pay:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
     /* Empty State */
     .empty-state {
         text-align: center;
@@ -164,25 +213,40 @@
 
 <div class="status-list">
     @forelse($bookings as $booking)
+    @php
+        $bookingEnd = \Carbon\Carbon::parse($booking->date . ' ' . $booking->end_time);
+        $isPending = $booking->status === 'pending';
+        $isApproved = $booking->status === 'approved';
+        $isRejected = $booking->status === 'rejected';
+        $isCompleted = $isApproved && $bookingEnd->isPast();
+        $isPaid = $isApproved || optional($booking->payment)->status === 'paid' || (int) $booking->total_price === 0;
+
+        $statusClass = $isRejected ? 'rejected' : ($isCompleted ? 'completed' : ($isApproved ? 'approved' : 'pending'));
+        $statusLabel = $isRejected ? 'Ditolak' : ($isCompleted ? 'Selesai' : ($isApproved ? 'Sudah Dibayar' : 'Menunggu Pembayaran'));
+    @endphp
     <div class="booking-card">
         <div class="booking-card-header">
-            <span class="booking-date">{{ \Carbon\Carbon::parse($booking->booking_date)->isoFormat('LL') }}</span>
+            <span class="booking-date">{{ \Carbon\Carbon::parse($booking->date)->isoFormat('LL') }}</span>
             <span class="booking-id">#RES-{{ $booking->id }}</span>
         </div>
         <div class="booking-card-body">
             <h4>{{ $booking->field->name }}</h4>
+            <div class="status-badge {{ $statusClass }}">
+                <i class="fa-solid {{ $isRejected ? 'fa-circle-xmark' : ($isCompleted ? 'fa-circle-check' : ($isApproved ? 'fa-credit-card' : 'fa-clock')) }}"></i>
+                {{ $statusLabel }}
+            </div>
             
             <div class="stepper">
-                <div class="step {{ $booking->status != 'pending' ? 'completed' : 'active' }}">
-                    <div class="step-circle">{!! $booking->status != 'pending' ? '<i class="fa-solid fa-check"></i>' : '1' !!}</div>
+                <div class="step {{ !$isPending && !$isRejected ? 'completed' : ($isPending ? 'active' : '') }}">
+                    <div class="step-circle">{!! !$isPending && !$isRejected ? '<i class="fa-solid fa-check"></i>' : '1' !!}</div>
                     <span class="step-label">Menunggu</span>
                 </div>
-                <div class="step {{ $booking->status == 'paid' || $booking->status == 'completed' ? 'completed' : ($booking->status == 'pending' ? '' : 'active') }}">
-                    <div class="step-circle">{!! $booking->status == 'paid' || $booking->status == 'completed' ? '<i class="fa-solid fa-check"></i>' : '2' !!}</div>
+                <div class="step {{ $isPaid && !$isRejected ? 'completed' : ($isPending ? '' : 'active') }}">
+                    <div class="step-circle">{!! $isPaid && !$isRejected ? '<i class="fa-solid fa-check"></i>' : '2' !!}</div>
                     <span class="step-label">Bayar</span>
                 </div>
-                <div class="step {{ $booking->status == 'completed' ? 'completed' : '' }}">
-                    <div class="step-circle">{!! $booking->status == 'completed' ? '<i class="fa-solid fa-check"></i>' : '3' !!}</div>
+                <div class="step {{ $isCompleted ? 'completed' : ($isApproved ? 'active' : '') }}">
+                    <div class="step-circle">{!! $isCompleted ? '<i class="fa-solid fa-check"></i>' : '3' !!}</div>
                     <span class="step-label">Selesai</span>
                 </div>
             </div>
@@ -197,6 +261,19 @@
                     <span class="detail-value" style="color: var(--primary);">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</span>
                 </div>
             </div>
+
+            @if($booking->status === 'pending' && $booking->total_price > 0)
+                <div class="booking-actions">
+                    <button
+                        type="button"
+                        class="btn-pay"
+                        onclick="payBooking(this, {{ $booking->id }}, '{{ $booking->booking_code }}', {{ (int) $booking->total_price }})"
+                    >
+                        <i class="fa-solid fa-credit-card"></i>
+                        Bayar Sekarang
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
     @empty
@@ -208,4 +285,75 @@
     </div>
     @endforelse
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script>
+async function payBooking(button, bookingId, bookingCode, amount) {
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
+    try {
+        const response = await fetch('/api/payments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                booking_id: bookingId,
+                method: 'midtrans'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Gagal membuat pembayaran.');
+        }
+
+        const data = await response.json();
+        if (!data.snap_token) {
+            throw new Error('Token Midtrans tidak tersedia.');
+        }
+
+        snap.pay(data.snap_token, {
+            onSuccess: async function() {
+                await markPaymentPaid(bookingCode, amount);
+                alert('Pembayaran berhasil.');
+                window.location.reload();
+            },
+            onPending: function() {
+                alert('Pembayaran masih pending. Silakan selesaikan transaksi.');
+                window.location.reload();
+            },
+            onError: function() {
+                alert('Pembayaran gagal. Silakan coba lagi.');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            },
+            onClose: function() {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        });
+    } catch (error) {
+        alert(error.message);
+        button.disabled = false;
+        button.innerHTML = originalText;
+    }
+}
+
+async function markPaymentPaid(bookingCode, amount) {
+    await fetch('/api/payments/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            order_id: bookingCode,
+            transaction_status: 'settlement',
+            gross_amount: amount.toString()
+        })
+    });
+}
+</script>
 @endsection

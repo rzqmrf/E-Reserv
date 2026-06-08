@@ -5,431 +5,456 @@
 
 <section class="an-hero">
     <div>
-        <h1>🧠 AI Analisis Keuangan</h1>
-        <p>Prediksi pendapatan berbasis Neural Network · Data real-time · Deep Learning</p>
+        <p class="eyebrow">AI Financial Intelligence</p>
+        <h1>Prediksi pendapatan dan rekomendasi operasional</h1>
+        <p class="hero-copy">Dashboard ini memakai data pembayaran paid, booking, dan performa lapangan untuk membaca tren 7 hari ke depan.</p>
     </div>
-    <div class="an-hero-badges">
-        <span class="badge-ai">⚡ Neural Network Aktif</span>
-        <span class="badge-live" id="liveStatus">● Memuat Data...</span>
+    <div class="hero-status">
+        <span class="status-pill" id="aiStatus">Memeriksa AI service...</span>
+        <span class="status-pill muted" id="modelStatus">Model belum dijalankan</span>
     </div>
 </section>
 
-{{-- KPI Cards --}}
 <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-card" id="kpi-revenue">
-        <div class="kpi-icon" style="background:#ecfdf5;color:#059669">💰</div>
-        <div><div class="kpi-val" id="kv-revenue">—</div><div class="kpi-lbl">Total Pendapatan</div></div>
-        <div class="kpi-badge" id="kb-growth">—</div>
+    <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-icon money">Rp</span><span class="kpi-badge" id="kb-growth">-</span></div>
+        <div class="kpi-val" id="kv-revenue">-</div>
+        <div class="kpi-lbl">Total Pendapatan</div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:#eff6ff;color:#2563eb">📅</div>
-        <div><div class="kpi-val" id="kv-month">—</div><div class="kpi-lbl">Bulan Ini</div></div>
+        <div class="kpi-top"><span class="kpi-icon month">30</span></div>
+        <div class="kpi-val" id="kv-month">-</div>
+        <div class="kpi-lbl">Pendapatan Bulan Ini</div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:#faf5ff;color:#7c3aed">📋</div>
-        <div><div class="kpi-val" id="kv-bookings">—</div><div class="kpi-lbl">Total Booking</div></div>
+        <div class="kpi-top"><span class="kpi-icon booking">Bk</span></div>
+        <div class="kpi-val" id="kv-bookings">-</div>
+        <div class="kpi-lbl">Total Booking</div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:#fff7ed;color:#c2410c">💎</div>
-        <div><div class="kpi-val" id="kv-avg">—</div><div class="kpi-lbl">Rata-rata Transaksi</div></div>
+        <div class="kpi-top"><span class="kpi-icon avg">Avg</span></div>
+        <div class="kpi-val" id="kv-avg">-</div>
+        <div class="kpi-lbl">Rata-rata Transaksi</div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:#ecfdf5;color:#16a34a">✅</div>
-        <div><div class="kpi-val" id="kv-paid">—</div><div class="kpi-lbl">Pembayaran Sukses</div></div>
+        <div class="kpi-top"><span class="kpi-icon paid">Ok</span></div>
+        <div class="kpi-val" id="kv-paid">-</div>
+        <div class="kpi-lbl">Pembayaran Sukses</div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:#fff1f2;color:#be123c">❌</div>
-        <div><div class="kpi-val" id="kv-failed">—</div><div class="kpi-lbl">Pembayaran Gagal</div></div>
+        <div class="kpi-top"><span class="kpi-icon failed">No</span></div>
+        <div class="kpi-val" id="kv-failed">-</div>
+        <div class="kpi-lbl">Pembayaran Gagal</div>
     </div>
 </div>
 
-{{-- Neural Network Prediction --}}
-<div class="an-card nn-card">
-    <div class="an-card-header">
-        <div>
-            <span class="tag-ai">🧠 Neural Network · LSTM Prediction</span>
-            <h3>Prediksi Pendapatan 7 Hari ke Depan</h3>
-        </div>
-        <button class="btn-run" id="btnRunNN" onclick="runNeuralNetwork()">▶ Jalankan Model</button>
-    </div>
-    <div id="nnStatus" class="nn-status">
-        <div class="nn-step" id="step1">⏳ Menunggu data historis...</div>
-        <div class="nn-step" id="step2">⏳ Normalisasi input...</div>
-        <div class="nn-step" id="step3">⏳ Inisialisasi bobot jaringan...</div>
-        <div class="nn-step" id="step4">⏳ Training epoch...</div>
-        <div class="nn-step" id="step5">⏳ Forward propagation...</div>
-        <div class="nn-step" id="step6">⏳ Menghasilkan prediksi...</div>
-    </div>
-    <div id="nnResult" style="display:none">
-        <canvas id="chartPredict" height="90"></canvas>
-        <div id="nnInsight" class="nn-insight"></div>
-    </div>
-</div>
-
-{{-- Charts Row --}}
-<div class="charts-row">
-    <div class="an-card" style="flex:2">
+<div class="ai-grid">
+    <section class="an-card ai-panel">
         <div class="an-card-header">
             <div>
-                <span class="tag">📈 Tren</span>
-                <h3>Pendapatan Harian (30 Hari)</h3>
+                <span class="tag-ai">Prediction Engine</span>
+                <h3>Prediksi Pendapatan 7 Hari</h3>
+            </div>
+            <button class="btn-run" id="btnRunNN" type="button" onclick="runPythonPrediction()">Jalankan AI</button>
+        </div>
+
+        <div class="model-metrics">
+            <div>
+                <span class="metric-label">Confidence</span>
+                <strong id="metricConfidence">-</strong>
+            </div>
+            <div>
+                <span class="metric-label">MAE</span>
+                <strong id="metricMae">-</strong>
+            </div>
+            <div>
+                <span class="metric-label">Training Samples</span>
+                <strong id="metricSamples">-</strong>
+            </div>
+        </div>
+
+        <div id="nnStatus" class="nn-status">
+            <div class="nn-step" id="step1">Menunggu data historis</div>
+            <div class="nn-step" id="step2">Menyiapkan fitur revenue, booking, dan kalender</div>
+            <div class="nn-step" id="step3">Menghubungi AI service</div>
+            <div class="nn-step" id="step4">Melatih model prediksi</div>
+            <div class="nn-step" id="step5">Membaca insight dan rekomendasi</div>
+        </div>
+
+        <div id="nnResult" class="prediction-result">
+            <canvas id="chartPredict" height="98"></canvas>
+        </div>
+    </section>
+
+    <aside class="an-card insight-panel">
+        <div class="an-card-header compact">
+            <div>
+                <span class="tag">AI Insight</span>
+                <h3>Ringkasan Keputusan</h3>
+            </div>
+        </div>
+        <div id="nnInsight" class="nn-insight empty">Jalankan model untuk melihat proyeksi, puncak pendapatan, dan rekomendasi admin.</div>
+        <div class="recommendations" id="recommendations"></div>
+    </aside>
+</div>
+
+<div class="charts-row">
+    <section class="an-card revenue-card">
+        <div class="an-card-header">
+            <div>
+                <span class="tag">Tren</span>
+                <h3>Pendapatan Harian dan Bulanan</h3>
             </div>
             <div class="tab-group">
-                <button class="tab active" onclick="switchChart('daily',this)">Harian</button>
-                <button class="tab" onclick="switchChart('monthly',this)">Bulanan</button>
+                <button class="tab active" type="button" onclick="switchChart('daily', this)">Harian</button>
+                <button class="tab" type="button" onclick="switchChart('monthly', this)">Bulanan</button>
             </div>
         </div>
-        <canvas id="chartRevenue" height="110"></canvas>
-    </div>
-    <div class="an-card" style="flex:1">
-        <div class="an-card-header">
-            <div><span class="tag">🎯 Status</span><h3>Distribusi Booking</h3></div>
+        <canvas id="chartRevenue" height="112"></canvas>
+    </section>
+
+    <section class="an-card status-card">
+        <div class="an-card-header compact">
+            <div>
+                <span class="tag">Status</span>
+                <h3>Distribusi Booking</h3>
+            </div>
         </div>
-        <canvas id="chartStatus" height="180"></canvas>
+        <canvas id="chartStatus" height="182"></canvas>
         <div id="statusLegend" class="donut-legend"></div>
-    </div>
+    </section>
 </div>
 
-{{-- Field Performance --}}
-<div class="an-card">
+<section class="an-card">
     <div class="an-card-header">
-        <div><span class="tag">🏟️ Lapangan</span><h3>Performa per Lapangan</h3></div>
+        <div>
+            <span class="tag">Lapangan</span>
+            <h3>Performa per Lapangan</h3>
+        </div>
     </div>
-    <canvas id="chartFields" height="80"></canvas>
-</div>
+    <canvas id="chartFields" height="82"></canvas>
+</section>
 
 <style>
-.an-hero{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;padding:28px 32px;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0d4f40 100%);border-radius:16px;border:1px solid rgba(255,255,255,.08)}
-.an-hero h1{font-size:1.5rem;font-weight:800;color:#fff;margin:0 0 6px}
-.an-hero p{color:rgba(255,255,255,.6);font-size:13px;margin:0}
-.an-hero-badges{display:flex;gap:10px;flex-wrap:wrap}
-.badge-ai{background:rgba(13,148,136,.3);color:#5eead4;border:1px solid rgba(94,234,212,.3);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700}
-.badge-live{color:#86efac;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.an-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:24px;padding:26px 30px;background:#101827;border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:var(--shadow-sm)}
+.eyebrow{margin:0 0 8px;color:#5eead4;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.an-hero h1{max-width:760px;margin:0;color:#fff;font-size:1.55rem;font-weight:800;line-height:1.25}
+.hero-copy{max-width:760px;margin:10px 0 0;color:rgba(255,255,255,.66);font-size:13px;line-height:1.7}
+.hero-status{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.status-pill{display:inline-flex;align-items:center;border-radius:999px;padding:7px 12px;background:rgba(20,184,166,.16);border:1px solid rgba(94,234,212,.28);color:#99f6e4;font-size:12px;font-weight:800}
+.status-pill.offline{background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.34);color:#fcd34d}
+.status-pill.muted{background:rgba(148,163,184,.14);border-color:rgba(148,163,184,.2);color:#cbd5e1}
 
-.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px}
-.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),transparent)}
-.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
-.kpi-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
-.kpi-val{font-family:'Space Grotesk',monospace;font-size:1.5rem;font-weight:800;color:var(--text);line-height:1}
-.kpi-lbl{font-size:11px;color:var(--text-3);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
-.kpi-badge{position:absolute;top:14px;right:14px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px}
-.kpi-badge.up{background:#dcfce7;color:#16a34a}
-.kpi-badge.down{background:#fee2e2;color:#dc2626}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.kpi-card{min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow-sm)}
+.kpi-top{height:34px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.kpi-icon{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:10px;font-size:11px;font-weight:900}
+.kpi-icon.money,.kpi-icon.paid{background:#ecfdf5;color:#059669}.kpi-icon.month{background:#eff6ff;color:#2563eb}.kpi-icon.booking{background:#f5f3ff;color:#7c3aed}.kpi-icon.avg{background:#fff7ed;color:#c2410c}.kpi-icon.failed{background:#fff1f2;color:#be123c}
+.kpi-val{font-family:'Space Grotesk',monospace;font-size:1.35rem;font-weight:800;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-lbl{margin-top:5px;font-size:10px;color:var(--text-3);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.kpi-badge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:var(--bg);color:var(--text-3)}
+.kpi-badge.up{background:#dcfce7;color:#15803d}.kpi-badge.down{background:#fee2e2;color:#dc2626}
 
-.an-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px 28px;box-shadow:var(--shadow-sm);margin-bottom:20px}
-.an-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px}
-.an-card-header h3{font-size:1rem;font-weight:700;color:var(--text);margin:6px 0 0}
-.tag,.tag-ai{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:100px}
-.tag{background:var(--primary-lt);color:var(--primary-dk)}
-.tag-ai{background:linear-gradient(135deg,#581c87,#1e3a8a);color:#e9d5ff}
+.ai-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:20px;margin-bottom:20px}
+.an-card{min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;box-shadow:var(--shadow-sm);margin-bottom:20px}
+.ai-grid .an-card,.charts-row .an-card{margin-bottom:0}
+.an-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.an-card-header.compact{margin-bottom:14px}
+.an-card-header h3{margin:6px 0 0;color:var(--text);font-size:1rem;font-weight:800}
+.tag,.tag-ai{display:inline-flex;border-radius:999px;padding:4px 10px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.tag{background:var(--primary-lt);color:var(--primary-dk)}.tag-ai{background:#312e81;color:#c4b5fd}
+.btn-run{border:0;border-radius:10px;background:#0d9488;color:#fff;padding:10px 16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:transform .2s,opacity .2s}
+.btn-run:hover{transform:translateY(-1px);opacity:.9}.btn-run:disabled{cursor:not-allowed;opacity:.55;transform:none}
+.model-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.model-metrics div{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px}
+.metric-label{display:block;margin-bottom:4px;color:var(--text-3);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.model-metrics strong{color:var(--text);font-family:'Space Grotesk',monospace;font-size:1rem}
+.nn-status{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.nn-step{min-height:48px;border:1px solid var(--border);border-radius:10px;padding:9px 10px;color:var(--text-3);font-size:11px;font-weight:700;line-height:1.35;background:var(--bg)}
+.nn-step.active{border-color:#7c3aed;color:#7c3aed;background:rgba(124,58,237,.08)}.nn-step.done{border-color:#0d9488;color:#0d9488;background:rgba(13,148,136,.08)}
+.prediction-result{min-height:220px}
+.nn-insight{border:1px solid rgba(13,148,136,.2);border-radius:12px;background:rgba(13,148,136,.06);padding:14px;color:var(--text-2);font-size:13px;line-height:1.7}
+.nn-insight.empty{border-color:var(--border);background:var(--bg);color:var(--text-3)}
+.nn-insight strong{color:var(--text)}
+.recommendations{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.rec-item{border:1px solid var(--border);border-radius:10px;background:var(--bg);padding:11px 12px;color:var(--text-2);font-size:12px;font-weight:700;line-height:1.5}
 
-.nn-card{border:1px solid rgba(139,92,246,.3);background:linear-gradient(135deg,var(--surface) 0%,rgba(139,92,246,.05) 100%)}
-.nn-status{display:flex;flex-direction:column;gap:8px;padding:16px;background:rgba(0,0,0,.15);border-radius:10px;font-family:'Space Grotesk',monospace;font-size:13px;margin-bottom:20px}
-.nn-step{color:var(--text-3);transition:color .3s}
-.nn-step.done{color:#34d399}
-.nn-step.active{color:#a78bfa;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.btn-run{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;font-family:'Plus Jakarta Sans',sans-serif}
-.btn-run:hover{opacity:.85;transform:scale(1.02)}
-.btn-run:disabled{opacity:.5;cursor:not-allowed}
-
-.nn-insight{margin-top:16px;padding:16px;background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(79,70,229,.1));border:1px solid rgba(139,92,246,.3);border-radius:10px;font-size:13px;color:var(--text-2);line-height:1.7}
-.nn-insight strong{color:#a78bfa}
-
-.charts-row{display:flex;gap:20px;margin-bottom:20px}
-.charts-row .an-card{margin-bottom:0}
-.tab-group{display:flex;gap:4px}
-.tab{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text-2);transition:all .2s}
-.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-.donut-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;justify-content:center}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text-2)}
-.legend-dot{width:10px;height:10px;border-radius:50%}
-
-@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-row{flex-direction:column}}
-@media(max-width:600px){.kpi-grid{grid-template-columns:1fr}.an-hero{padding:20px}.an-card{padding:18px 16px}}
+.charts-row{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.7fr);gap:20px;margin-bottom:20px}
+.tab-group{display:flex;gap:6px;flex-wrap:wrap}.tab{border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text-2);padding:7px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;cursor:pointer}.tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.donut-legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px;justify-content:center}.legend-item{display:flex;align-items:center;gap:6px;color:var(--text-2);font-size:12px;font-weight:700}.legend-dot{width:10px;height:10px;border-radius:50%}
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.ai-grid,.charts-row{grid-template-columns:1fr}.nn-status{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.kpi-grid,.model-metrics,.nn-status{grid-template-columns:1fr}.an-hero,.an-card{padding:18px}.an-card-header{flex-direction:column}.hero-status{justify-content:flex-start}.kpi-val{font-size:1.2rem}}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script>
-/* ── Helpers ── */
-const fmt = n => 'Rp ' + Number(n).toLocaleString('id-ID');
-const fmtShort = n => n >= 1e6 ? 'Rp '+(n/1e6).toFixed(1)+'jt' : n >= 1e3 ? 'Rp '+(n/1e3).toFixed(0)+'rb' : 'Rp '+n;
-
-let chartRevenue = null, chartStatus = null, chartFields = null, chartPredict = null;
-let dailyData = [], monthlyData = [], nnRawData = [];
-
-/* ── Color palette ── */
-const C = {
-    teal:'#0d9488', tealL:'rgba(13,148,136,.15)',
-    violet:'#7c3aed', violetL:'rgba(124,58,237,.15)',
-    blue:'#2563eb',  blueL:'rgba(37,99,235,.15)',
-    pink:'#db2777',  green:'#16a34a', amber:'#d97706', red:'#dc2626'
+const fmt = n => 'Rp ' + Math.round(Number(n || 0)).toLocaleString('id-ID');
+const fmtShort = n => {
+    n = Number(n || 0);
+    if (n >= 1000000) return 'Rp ' + (n / 1000000).toFixed(1).replace('.', ',') + 'jt';
+    if (n >= 1000) return 'Rp ' + Math.round(n / 1000) + 'rb';
+    return 'Rp ' + Math.round(n);
 };
 
-/* ── Load KPIs ── */
-async function loadSummary() {
-    try {
-        const r = await fetch('/api/analytics/summary');
-        const d = await r.json();
-        document.getElementById('kv-revenue').textContent  = fmtShort(d.total_revenue);
-        document.getElementById('kv-month').textContent    = fmtShort(d.month_revenue);
-        document.getElementById('kv-bookings').textContent = d.total_bookings;
-        document.getElementById('kv-avg').textContent      = fmtShort(d.avg_transaction);
-        document.getElementById('kv-paid').textContent     = d.paid_payments;
-        document.getElementById('kv-failed').textContent   = d.failed_payments;
-        const badge = document.getElementById('kb-growth');
-        badge.textContent = (d.revenue_growth >= 0 ? '▲ ' : '▼ ') + Math.abs(d.revenue_growth) + '%';
-        badge.className = 'kpi-badge ' + (d.revenue_growth >= 0 ? 'up' : 'down');
-        document.getElementById('liveStatus').textContent = '● Live';
-    } catch(e) { document.getElementById('liveStatus').textContent = '● Offline'; }
+let chartRevenue = null;
+let chartStatus = null;
+let chartFields = null;
+let chartPredict = null;
+let dailyData = [];
+let monthlyData = [];
+let nnRawData = [];
+
+const C = {
+    teal: '#0d9488',
+    tealL: 'rgba(13,148,136,.15)',
+    violet: '#7c3aed',
+    violetL: 'rgba(124,58,237,.15)',
+    blue: '#2563eb',
+    amber: '#d97706',
+    red: '#dc2626',
+    slate: '#64748b'
+};
+
+async function fetchJson(url) {
+    const response = await fetch(url, {headers: {'Accept': 'application/json'}});
+    if (!response.ok) throw new Error('Gagal memuat ' + url);
+    return response.json();
 }
 
-/* ── Daily Revenue Chart ── */
+async function loadAIStatus() {
+    const pill = document.getElementById('aiStatus');
+    try {
+        const data = await fetchJson('/api/analytics/ai-status');
+        pill.textContent = data.online ? 'Python AI online' : 'Python AI offline';
+        pill.classList.toggle('offline', !data.online);
+    } catch (error) {
+        pill.textContent = 'Python AI offline';
+        pill.classList.add('offline');
+    }
+}
+
+async function loadSummary() {
+    const d = await fetchJson('/api/analytics/summary');
+    document.getElementById('kv-revenue').textContent = fmtShort(d.total_revenue);
+    document.getElementById('kv-month').textContent = fmtShort(d.month_revenue);
+    document.getElementById('kv-bookings').textContent = d.total_bookings || 0;
+    document.getElementById('kv-avg').textContent = fmtShort(d.avg_transaction);
+    document.getElementById('kv-paid').textContent = d.paid_payments || 0;
+    document.getElementById('kv-failed').textContent = d.failed_payments || 0;
+
+    const badge = document.getElementById('kb-growth');
+    const growth = Number(d.revenue_growth || 0);
+    badge.textContent = (growth >= 0 ? '+' : '-') + Math.abs(growth) + '%';
+    badge.className = 'kpi-badge ' + (growth >= 0 ? 'up' : 'down');
+}
+
 async function loadDaily() {
-    const r = await fetch('/api/analytics/daily-revenue');
-    dailyData = await r.json();
+    dailyData = await fetchJson('/api/analytics/daily-revenue');
     renderRevenueChart(dailyData, 'daily');
 }
 
 async function loadMonthly() {
-    const r = await fetch('/api/analytics/monthly-revenue');
-    monthlyData = await r.json();
+    monthlyData = await fetchJson('/api/analytics/monthly-revenue');
 }
 
 function renderRevenueChart(data, type) {
-    const labels  = data.map(d => type==='daily' ? d.date : d.month);
-    const revenues = data.map(d => d.revenue);
+    const labels = data.map(d => type === 'daily' ? d.date : d.month);
+    const revenues = data.map(d => Number(d.revenue || 0));
     if (chartRevenue) chartRevenue.destroy();
+
     const ctx = document.getElementById('chartRevenue').getContext('2d');
-    const grad = ctx.createLinearGradient(0,0,0,300);
-    grad.addColorStop(0, 'rgba(13,148,136,.4)');
+    const grad = ctx.createLinearGradient(0, 0, 0, 280);
+    grad.addColorStop(0, 'rgba(13,148,136,.35)');
     grad.addColorStop(1, 'rgba(13,148,136,.02)');
+
     chartRevenue = new Chart(ctx, {
-        type:'line',
-        data:{
-            labels,
-            datasets:[{
-                label:'Pendapatan',
-                data: revenues,
-                borderColor: C.teal, backgroundColor: grad,
-                borderWidth:2.5, pointRadius:3, pointHoverRadius:6,
-                fill:true, tension:.4
-            }]
-        },
-        options:{
-            responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:t=>fmt(t.raw)}}},
-            scales:{
-                y:{ticks:{callback:v=>fmtShort(v)},grid:{color:'rgba(255,255,255,.05)'}},
-                x:{ticks:{maxTicksLimit:10},grid:{display:false}}
+        type: 'line',
+        data: {labels, datasets: [{label: 'Pendapatan', data: revenues, borderColor: C.teal, backgroundColor: grad, borderWidth: 2.5, pointRadius: 3, pointHoverRadius: 6, fill: true, tension: .36}]},
+        options: {
+            responsive: true,
+            plugins: {legend: {display: false}, tooltip: {callbacks: {label: item => fmt(item.raw)}}},
+            scales: {
+                y: {ticks: {callback: value => fmtShort(value)}, grid: {color: 'rgba(148,163,184,.15)'}},
+                x: {ticks: {maxTicksLimit: 10}, grid: {display: false}}
             }
         }
     });
 }
 
-function switchChart(type, btn) {
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    btn.classList.add('active');
-    if (type==='daily') renderRevenueChart(dailyData,'daily');
-    else if (monthlyData.length) renderRevenueChart(monthlyData,'monthly');
-    else loadMonthly().then(()=>renderRevenueChart(monthlyData,'monthly'));
+async function switchChart(type, button) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    button.classList.add('active');
+    if (type === 'daily') {
+        renderRevenueChart(dailyData, 'daily');
+        return;
+    }
+    if (!monthlyData.length) await loadMonthly();
+    renderRevenueChart(monthlyData, 'monthly');
 }
 
-/* ── Booking Status Donut ── */
 async function loadStatus() {
-    const r = await fetch('/api/analytics/booking-status');
-    const d = await r.json();
-    const labels  = d.map(x=>x.status);
-    const counts  = d.map(x=>x.count);
-    const colors  = ['#0d9488','#f59e0b','#dc2626','#6366f1','#64748b'];
+    const data = await fetchJson('/api/analytics/booking-status');
+    const labels = data.map(item => item.status || 'unknown');
+    const counts = data.map(item => Number(item.count || 0));
+    const colors = [C.teal, C.amber, C.red, C.violet, C.slate];
+
     if (chartStatus) chartStatus.destroy();
-    chartStatus = new Chart(document.getElementById('chartStatus').getContext('2d'),{
-        type:'doughnut',
-        data:{labels, datasets:[{data:counts, backgroundColor:colors, borderWidth:0, hoverOffset:8}]},
-        options:{responsive:true,plugins:{legend:{display:false}},cutout:'70%'}
+    chartStatus = new Chart(document.getElementById('chartStatus').getContext('2d'), {
+        type: 'doughnut',
+        data: {labels, datasets: [{data: counts, backgroundColor: colors, borderWidth: 0, hoverOffset: 8}]},
+        options: {responsive: true, plugins: {legend: {display: false}}, cutout: '70%'}
     });
-    document.getElementById('statusLegend').innerHTML = labels.map((l,i)=>
-        `<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div>${l}: <strong>${counts[i]}</strong></div>`
+
+    document.getElementById('statusLegend').innerHTML = labels.map((label, index) =>
+        `<div class="legend-item"><span class="legend-dot" style="background:${colors[index % colors.length]}"></span>${label}: <strong>${counts[index]}</strong></div>`
     ).join('');
 }
 
-/* ── Field Performance ── */
 async function loadFields() {
-    const r = await fetch('/api/analytics/field-performance');
-    const d = await r.json();
-    const labels   = d.map(x=>x.name);
-    const revenues = d.map(x=>x.revenue);
-    const bookings = d.map(x=>x.bookings);
+    const data = await fetchJson('/api/analytics/field-performance');
+    const labels = data.map(item => item.name);
+    const revenues = data.map(item => Number(item.revenue || 0));
+    const bookings = data.map(item => Number(item.bookings || 0));
+
     if (chartFields) chartFields.destroy();
-    chartFields = new Chart(document.getElementById('chartFields').getContext('2d'),{
-        type:'bar',
-        data:{labels, datasets:[
-            {label:'Pendapatan',data:revenues,backgroundColor:C.tealL,borderColor:C.teal,borderWidth:2,borderRadius:6,yAxisID:'y'},
-            {label:'Booking',data:bookings,type:'line',borderColor:C.violet,backgroundColor:C.violetL,borderWidth:2.5,pointRadius:4,fill:true,tension:.4,yAxisID:'y1'}
-        ]},
-        options:{
-            responsive:true,
-            plugins:{legend:{labels:{color:'#94a3b8',font:{size:12}}}},
-            scales:{
-                y:{ticks:{callback:v=>fmtShort(v)},grid:{color:'rgba(255,255,255,.05)'}},
-                y1:{position:'right',grid:{display:false},ticks:{color:'#94a3b8'}}
-            }
-        }
-    });
-}
-
-/* ── Neural Network (Pure JS Implementation) ── */
-async function loadNNData() {
-    const r = await fetch('/api/analytics/neural-network-data');
-    nnRawData = await r.json();
-}
-
-function sigmoid(x){ return 1/(1+Math.exp(-x)); }
-function sigmoidDeriv(x){ return x*(1-x); }
-
-async function runNeuralNetwork() {
-    const btn = document.getElementById('btnRunNN');
-    btn.disabled = true;
-    btn.textContent = '⏳ Memproses...';
-
-    // Step 1: Load data
-    setStep(1,'active');
-    if (!nnRawData.length) await loadNNData();
-    await delay(600); setStep(1,'done');
-
-    // Step 2: Normalize
-    setStep(2,'active');
-    const revenues = nnRawData.map(d=>d.revenue);
-    const maxRev = Math.max(...revenues) || 1;
-    const minRev = Math.min(...revenues);
-    const normalize = v => (v - minRev) / (maxRev - minRev + 1e-9);
-    const denormalize = v => v * (maxRev - minRev) + minRev;
-
-    // Build sequences (window=7)
-    const W = 7;
-    const X = [], Y = [];
-    for (let i = W; i < revenues.length; i++) {
-        X.push(revenues.slice(i-W,i).map(normalize));
-        Y.push(normalize(revenues[i]));
-    }
-    await delay(500); setStep(2,'done');
-
-    // Step 3: Init weights
-    setStep(3,'active');
-    const H = 10; // hidden nodes
-    let W1 = Array.from({length:W}, ()=>Array.from({length:H},()=>(Math.random()-0.5)*0.5));
-    let b1 = Array(H).fill(0).map(()=>(Math.random()-0.5)*0.1);
-    let W2 = Array.from({length:H},()=>(Math.random()-0.5)*0.5);
-    let b2 = (Math.random()-0.5)*0.1;
-    const lr = 0.05;
-    await delay(500); setStep(3,'done');
-
-    // Step 4: Train
-    setStep(4,'active');
-    for (let ep = 0; ep < 400; ep++) {
-        for (let i = 0; i < X.length; i++) {
-            const x = X[i], y = Y[i];
-            // Forward
-            const h = b1.map((b,j)=>sigmoid(x.reduce((s,xi,k)=>s+xi*W1[k][j],0)+b));
-            const out = sigmoid(h.reduce((s,hi,j)=>s+hi*W2[j],0)+b2);
-            // Backward
-            const dOut = (out-y)*sigmoidDeriv(out);
-            const dH   = h.map((hi,j)=>dOut*W2[j]*sigmoidDeriv(hi));
-            W2 = W2.map((w,j)=>w-lr*dOut*h[j]);
-            b2 -= lr*dOut;
-            W1 = W1.map((row,k)=>row.map((w,j)=>w-lr*dH[j]*x[k]));
-            b1 = b1.map((b,j)=>b-lr*dH[j]);
-        }
-    }
-    await delay(800); setStep(4,'done');
-
-    // Step 5: Forward pass predict
-    setStep(5,'active');
-    const predict = (seq) => {
-        const x = seq.map(normalize);
-        const h = b1.map((b,j)=>sigmoid(x.reduce((s,xi,k)=>s+xi*W1[k][j],0)+b));
-        return denormalize(sigmoid(h.reduce((s,hi,j)=>s+hi*W2[j],0)+b2));
-    };
-    await delay(500); setStep(5,'done');
-
-    // Step 6: Generate 7-day prediction
-    setStep(6,'active');
-    let window7 = revenues.slice(-W);
-    const predictions = [];
-    const days = ['Besok','2 Hari','3 Hari','4 Hari','5 Hari','6 Hari','7 Hari'];
-    for (let i = 0; i < 7; i++) {
-        const p = Math.max(0, predict(window7));
-        predictions.push(p);
-        window7 = [...window7.slice(1), p];
-    }
-    await delay(500); setStep(6,'done');
-
-    // Render prediction chart
-    document.getElementById('nnResult').style.display = 'block';
-    if (chartPredict) chartPredict.destroy();
-    const histLabels = nnRawData.slice(-14).map(d=>d.date);
-    const histRevs   = nnRawData.slice(-14).map(d=>d.revenue);
-    chartPredict = new Chart(document.getElementById('chartPredict').getContext('2d'),{
-        type:'line',
-        data:{
-            labels:[...histLabels,...days],
-            datasets:[
-                {label:'Historis',data:[...histRevs,...Array(7).fill(null)],borderColor:C.teal,backgroundColor:C.tealL,borderWidth:2,pointRadius:3,fill:true,tension:.4},
-                {label:'Prediksi AI',data:[...Array(14).fill(null),predictions[0],...predictions.slice(1)].map((v,i)=>i===13?histRevs[13]:v),borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.15)',borderWidth:2.5,borderDash:[6,3],pointRadius:4,pointBackgroundColor:'#a78bfa',fill:true,tension:.4}
+    chartFields = new Chart(document.getElementById('chartFields').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {label: 'Pendapatan', data: revenues, backgroundColor: C.tealL, borderColor: C.teal, borderWidth: 2, borderRadius: 6, yAxisID: 'y'},
+                {label: 'Booking', data: bookings, type: 'line', borderColor: C.violet, backgroundColor: C.violetL, borderWidth: 2.5, pointRadius: 4, fill: true, tension: .36, yAxisID: 'y1'}
             ]
         },
-        options:{
-            responsive:true,
-            plugins:{legend:{labels:{color:'#94a3b8',font:{size:12}}},tooltip:{callbacks:{label:t=>fmt(t.raw)}}},
-            scales:{
-                y:{ticks:{callback:v=>fmtShort(v)},grid:{color:'rgba(255,255,255,.05)'}},
-                x:{grid:{display:false}}
+        options: {
+            responsive: true,
+            plugins: {legend: {labels: {color: '#64748b', font: {size: 12}}}},
+            scales: {
+                y: {ticks: {callback: value => fmtShort(value)}, grid: {color: 'rgba(148,163,184,.15)'}},
+                y1: {position: 'right', grid: {display: false}, ticks: {color: '#64748b'}}
             }
         }
     });
+}
 
-    // Insight
-    const totalPred = predictions.reduce((a,b)=>a+b,0);
-    const avgPred   = totalPred/7;
-    const lastWeek  = revenues.slice(-7).reduce((a,b)=>a+b,0)/7;
-    const growth    = lastWeek>0?((avgPred-lastWeek)/lastWeek*100).toFixed(1):0;
-    const trend     = growth>0?'meningkat 📈':'menurun 📉';
-    document.getElementById('nnInsight').innerHTML = `
-        <strong>🧠 Insight Neural Network:</strong><br>
-        Model LSTM memprediksi total pendapatan 7 hari ke depan sebesar <strong>${fmt(Math.round(totalPred))}</strong>
-        dengan rata-rata harian <strong>${fmt(Math.round(avgPred))}</strong>.
-        Dibandingkan minggu lalu, tren pendapatan diprediksi <strong>${trend}</strong> sebesar <strong>${Math.abs(growth)}%</strong>.
-        Puncak tertinggi diprediksi pada hari ke-<strong>${predictions.indexOf(Math.max(...predictions))+1}</strong> sebesar <strong>${fmt(Math.round(Math.max(...predictions)))}</strong>.
+async function loadNNData() {
+    nnRawData = await fetchJson('/api/analytics/neural-network-data');
+}
+
+async function runPythonPrediction() {
+    const btn = document.getElementById('btnRunNN');
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+    resetSteps();
+
+    try {
+        setStep(1, 'active');
+        if (!nnRawData.length) await loadNNData();
+        await delay(180); setStep(1, 'done');
+
+        setStep(2, 'active');
+        await delay(180); setStep(2, 'done');
+
+        setStep(3, 'active');
+        const result = await fetchJson('/api/analytics/python-prediction');
+        await loadAIStatus();
+        await delay(180); setStep(3, 'done');
+
+        setStep(4, 'active');
+        renderPrediction(result);
+        await delay(180); setStep(4, 'done');
+
+        setStep(5, 'active');
+        renderInsight(result);
+        await delay(180); setStep(5, 'done');
+
+        btn.textContent = 'Jalankan Ulang';
+    } catch (error) {
+        document.getElementById('nnInsight').className = 'nn-insight';
+        document.getElementById('nnInsight').innerHTML = `<strong>AI belum dapat dijalankan.</strong><br>${error.message}`;
+        btn.textContent = 'Jalankan AI';
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function renderPrediction(result) {
+    const history = result.history || nnRawData.slice(-14);
+    const predictions = result.predictions || [];
+    const histLabels = history.map(item => item.date);
+    const histRevs = history.map(item => Number(item.revenue || 0));
+    const predLabels = predictions.map(item => item.label);
+    const predRevs = predictions.map(item => Number(item.revenue || 0));
+
+    if (chartPredict) chartPredict.destroy();
+    chartPredict = new Chart(document.getElementById('chartPredict').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [...histLabels, ...predLabels],
+            datasets: [
+                {label: 'Historis', data: [...histRevs, ...Array(predRevs.length).fill(null)], borderColor: C.teal, backgroundColor: C.tealL, borderWidth: 2, pointRadius: 3, fill: true, tension: .36},
+                {label: 'Prediksi AI', data: [...Array(Math.max(histRevs.length - 1, 0)).fill(null), histRevs[histRevs.length - 1] || 0, ...predRevs], borderColor: C.violet, backgroundColor: C.violetL, borderWidth: 2.5, borderDash: [6, 3], pointRadius: 4, pointBackgroundColor: C.violet, fill: true, tension: .36}
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {legend: {labels: {color: '#64748b', font: {size: 12}}}, tooltip: {callbacks: {label: item => fmt(item.raw)}}},
+            scales: {
+                y: {ticks: {callback: value => fmtShort(value)}, grid: {color: 'rgba(148,163,184,.15)'}},
+                x: {grid: {display: false}}
+            }
+        }
+    });
+}
+
+function renderInsight(result) {
+    const insight = result.insight || {};
+    const model = result.model || {};
+    const quality = model.quality || {};
+    const sourceLabel = 'Python AI Service';
+
+    document.getElementById('modelStatus').textContent = `${sourceLabel} - ${model.name || 'Model prediksi'}`;
+    document.getElementById('metricConfidence').textContent = quality.confidence !== undefined ? quality.confidence + '%' : '-';
+    document.getElementById('metricMae').textContent = quality.mae !== undefined ? fmtShort(quality.mae) : '-';
+    document.getElementById('metricSamples').textContent = model.training_samples !== undefined ? model.training_samples : '-';
+
+    const insightBox = document.getElementById('nnInsight');
+    insightBox.className = 'nn-insight';
+    insightBox.innerHTML = `
+        <strong>${sourceLabel}</strong><br>
+        Total prediksi 7 hari: <strong>${fmt(insight.total_prediction)}</strong><br>
+        Rata-rata harian: <strong>${fmt(insight.average_daily)}</strong><br>
+        Tren: <strong>${insight.trend || '-'}</strong> ${Number(insight.growth_percent || 0)}%<br>
+        Puncak: <strong>${insight.peak_day || '-'}</strong> sebesar <strong>${fmt(insight.peak_revenue)}</strong>
     `;
 
-    btn.disabled = false;
-    btn.textContent = '🔄 Jalankan Ulang';
+    const recommendations = insight.recommendations || [];
+    document.getElementById('recommendations').innerHTML = recommendations.map(item =>
+        `<div class="rec-item">${item}</div>`
+    ).join('');
 }
 
-function setStep(n, state) {
-    const el = document.getElementById('step'+n);
-    const icons = {active:'⚡', done:'✅'};
-    const texts = [
-        null,
-        'Memuat data historis 60 hari...',
-        'Normalisasi dan windowing input...',
-        'Inisialisasi bobot jaringan (10 hidden nodes)...',
-        'Training 400 epoch dengan backpropagation...',
-        'Forward propagation pada data terbaru...',
-        'Menghasilkan prediksi 7 hari ke depan...'
-    ];
-    el.className = 'nn-step ' + state;
-    el.textContent = (icons[state]||'⏳') + ' ' + texts[n];
+function resetSteps() {
+    for (let i = 1; i <= 5; i++) {
+        document.getElementById('step' + i).className = 'nn-step';
+    }
 }
 
-const delay = ms => new Promise(r=>setTimeout(r,ms));
+function setStep(index, state) {
+    document.getElementById('step' + index).className = 'nn-step ' + state;
+}
 
-/* ── Init ── */
-(async()=>{
-    await Promise.all([loadSummary(), loadDaily(), loadStatus(), loadFields()]);
-    loadNNData(); // preload NN data
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+(async () => {
+    try {
+        await Promise.all([loadAIStatus(), loadSummary(), loadDaily(), loadStatus(), loadFields()]);
+        loadMonthly();
+        loadNNData();
+    } catch (error) {
+        document.getElementById('aiStatus').textContent = 'Data analytics belum siap';
+        document.getElementById('aiStatus').classList.add('offline');
+    }
 })();
 </script>
 @endsection

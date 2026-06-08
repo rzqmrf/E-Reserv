@@ -115,6 +115,14 @@
                 </div>
                 <span class="quick-arrow">→</span>
             </a>
+            <a href="/admin/users" class="quick-link">
+                <span class="quick-icon">👤</span>
+                <div>
+                    <div class="quick-title">Kelola Users</div>
+                    <div class="quick-desc">Tambah, edit, hapus data pengguna</div>
+                </div>
+                <span class="quick-arrow">→</span>
+            </a>
         </div>
     </div>
 
