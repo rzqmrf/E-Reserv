@@ -52,9 +52,13 @@ Route::get('/payments', [PaymentController::class, 'index']);
 // untuk api auth
 Route::post('/login', [AuthController::class, 'apilogin']);
 Route::post('/register', [AuthController::class, 'apiregister']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/profile/photo', [AuthController::class, 'uploadProfilePhoto']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/profile/password', [AuthController::class, 'changePassword']);
     Route::get('/user', function (Request $request) {
         return response()->json(['data' => $request->user()]);
     });

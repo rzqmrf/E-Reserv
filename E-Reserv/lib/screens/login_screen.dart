@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'register_screen.dart';
 import 'main_navigation.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -137,7 +138,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ForgotPasswordScreen(),
+                              ),
+                            ),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.primary,
                               textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),

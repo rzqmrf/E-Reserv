@@ -17,7 +17,17 @@ class User extends Authenticatable
         'phone',
         'password',
         'role',
+        'photo_url',
     ];
+
+    // Accessor: kembalikan URL lengkap photo
+    public function getPhotoUrlAttribute($value): ?string
+    {
+        if (!$value) return null;
+        // Jika sudah URL penuh, kembalikan apa adanya
+        if (str_starts_with($value, 'http')) return $value;
+        return url('storage/' . $value);
+    }
 
     protected $hidden = [
         'password',

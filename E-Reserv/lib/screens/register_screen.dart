@@ -89,16 +89,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                Text(
+                const Text(
                   'Daftar Akun',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -1),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -1),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Buat akun baru untuk mulai reservasi',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 40),
                 Container(
