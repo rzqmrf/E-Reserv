@@ -141,9 +141,10 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        // Hapus foto lama jika ada
-        if ($user->getRawOriginal('photo_url')) {
-            Storage::disk('public')->delete($user->getRawOriginal('photo_url'));
+        // Hapus foto lama jika ada (ambil nilai mentah dari DB, bukan accessor)
+        $oldPath = $user->getAttributes()['photo_url'] ?? null;
+        if ($oldPath && !str_starts_with($oldPath, 'http')) {
+            Storage::disk('public')->delete($oldPath);
         }
 
         // Simpan file baru → storage/app/public/profile_photos/{userId}_{timestamp}.jpg
@@ -152,8 +153,12 @@ class AuthController extends Controller
             'public'
         );
 
-        $user->photo_url = $path;
+        // Simpan path mentah ke DB
+        $user->setAttribute('photo_url', $path);
         $user->save();
+
+        // Refresh model agar accessor mengembalikan URL lengkap
+        $user->refresh();
 
         return response()->json([
             'message'   => 'Foto profil berhasil diperbarui.',

@@ -50,7 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               Container(
                 width: 64,
                 height: 64,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.successBg,
                   shape: BoxShape.circle,
                 ),
@@ -219,10 +219,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             ),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty)
+                            if (v == null || v.isEmpty) {
                               return 'Password baru wajib diisi';
-                            if (v.length < 6)
+                            }
+                            if (v.length < 6) {
                               return 'Password minimal 6 karakter';
+                            }
                             return null;
                           },
                         ),
@@ -249,10 +251,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             ),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty)
+                            if (v == null || v.isEmpty) {
                               return 'Konfirmasi password wajib diisi';
-                            if (v != _passCtrl.text)
+                            }
+                            if (v != _passCtrl.text) {
                               return 'Password tidak sama';
+                            }
                             return null;
                           },
                         ),

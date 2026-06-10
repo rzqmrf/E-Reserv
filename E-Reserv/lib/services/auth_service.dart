@@ -3,8 +3,9 @@
 // ============================================================
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/models.dart';
 import 'api_service.dart';
 
@@ -107,7 +108,7 @@ class AuthService {
   }
 
   // POST /api/profile/photo  — multipart upload
-  static Future<User> uploadPhoto(File imageFile) async {
+  static Future<User> uploadPhoto(XFile imageFile) async {
     final uri = Uri.parse('${ApiService.baseUrl}/profile/photo');
     final request = http.MultipartRequest('POST', uri);
 
@@ -116,7 +117,20 @@ class AuthService {
       if (ApiService.token != null) 'Authorization': 'Bearer ${ApiService.token}',
     });
 
-    request.files.add(await http.MultipartFile.fromPath('photo', imageFile.path));
+    // Tentukan MIME type dari ekstensi file
+    final fileName = imageFile.name.toLowerCase();
+    String mimeType = 'image/jpeg';
+    if (fileName.endsWith('.png')) mimeType = 'image/png';
+    if (fileName.endsWith('.webp')) mimeType = 'image/webp';
+    if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) mimeType = 'image/jpeg';
+
+    final bytes = await imageFile.readAsBytes();
+    request.files.add(http.MultipartFile.fromBytes(
+      'photo',
+      bytes,
+      filename: imageFile.name,
+      contentType: MediaType.parse(mimeType),
+    ));
 
     final streamed = await request.send();
     final response = await http.Response.fromStream(streamed);

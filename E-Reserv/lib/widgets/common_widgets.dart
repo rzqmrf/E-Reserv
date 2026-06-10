@@ -132,25 +132,25 @@ class _NotifContent extends StatelessWidget {
   _NotifConfig _config(_NotifType t) {
     switch (t) {
       case _NotifType.success:
-        return _NotifConfig(
-          bg: const Color(0xFFF0FDF4),
+        return const _NotifConfig(
+          bg: Color(0xFFF0FDF4),
           accent: AppColors.success,
           icon: Icons.check_circle_rounded,
         );
       case _NotifType.error:
-        return _NotifConfig(
-          bg: const Color(0xFFFFF1F2),
+        return const _NotifConfig(
+          bg: Color(0xFFFFF1F2),
           accent: AppColors.error,
           icon: Icons.error_rounded,
         );
       case _NotifType.warning:
-        return _NotifConfig(
-          bg: const Color(0xFFFFFBEB),
+        return const _NotifConfig(
+          bg: Color(0xFFFFFBEB),
           accent: AppColors.warning,
           icon: Icons.warning_amber_rounded,
         );
       case _NotifType.info:
-        return _NotifConfig(
+        return const _NotifConfig(
           bg: AppColors.primaryLight,
           accent: AppColors.primary,
           icon: Icons.info_rounded,
