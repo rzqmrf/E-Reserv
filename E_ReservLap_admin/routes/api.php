@@ -52,6 +52,7 @@ Route::get('/payments', [PaymentController::class, 'index']);
 // untuk api auth
 Route::post('/login', [AuthController::class, 'apilogin']);
 Route::post('/register', [AuthController::class, 'apiregister']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

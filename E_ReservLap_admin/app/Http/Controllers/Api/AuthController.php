@@ -81,6 +81,42 @@ class AuthController extends Controller
     }
 
     /**
+     * Forgot Password — Reset langsung tanpa email
+     * POST /api/forgot-password
+     * Body: { email, password, password_confirmation }
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email'                 => ['required', 'email'],
+            'password'              => ['required', 'string', 'min:6', 'confirmed'],
+            'password_confirmation' => ['required'],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Email tidak ditemukan. Pastikan email yang Anda masukkan sudah terdaftar.'
+            ], 404);
+        }
+
+        // Cegah admin reset via app
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message' => 'Akses ditolak.'
+            ], 403);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password berhasil diperbarui. Silakan login dengan password baru Anda.'
+        ]);
+    }
+
+    /**
      * Handle API Logout
      */
     public function logout(Request $request)

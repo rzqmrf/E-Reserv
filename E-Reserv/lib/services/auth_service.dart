@@ -58,6 +58,19 @@ class AuthService {
     _isLoggedIn = true;
   }
 
+  // POST /api/forgot-password
+  static Future<void> forgotPassword({
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    await ApiService.post('/forgot-password', {
+      'email': email,
+      'password': password,
+      'password_confirmation': passwordConfirmation,
+    });
+  }
+
   static Future<void> logout() async {
     try {
       await ApiService.post('/logout', {});
