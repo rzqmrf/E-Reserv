@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -127,4 +128,88 @@ class AuthController extends Controller
             'message' => 'Logout berhasil'
         ]);
     }
+
+    /**
+     * Upload Foto Profil
+     * POST /api/profile/photo  (auth:sanctum)
+     */
+    public function uploadProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'], // max 3MB
+        ]);
+
+        $user = $request->user();
+
+        // Hapus foto lama jika ada
+        if ($user->getRawOriginal('photo_url')) {
+            Storage::disk('public')->delete($user->getRawOriginal('photo_url'));
+        }
+
+        // Simpan file baru → storage/app/public/profile_photos/{userId}_{timestamp}.jpg
+        $path = $request->file('photo')->store(
+            'profile_photos',
+            'public'
+        );
+
+        $user->photo_url = $path;
+        $user->save();
+
+        return response()->json([
+            'message'   => 'Foto profil berhasil diperbarui.',
+            'photo_url' => $user->photo_url, // accessor sudah mengembalikan URL penuh
+            'user'      => $user,
+        ]);
+    }
+
+    /**
+     * Update Profil (nama & telepon)
+     * PUT /api/profile  (auth:sanctum)
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+        ]);
+
+        $user->name  = $request->name;
+        $user->phone = $request->phone;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user'    => $user,
+        ]);
+    }
+
+    /**
+     * Ubah Password
+     * PUT /api/profile/password  (auth:sanctum)
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => ['required', 'string'],
+            'password'     => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'message' => 'Password lama tidak cocok.'
+            ], 422);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password berhasil diubah.'
+        ]);
+    }
 }
+

@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import 'login_screen.dart';
@@ -15,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   User? _user;
   bool _loading = true;
+  bool _uploadingPhoto = false;
 
   @override
   void initState() {
@@ -30,6 +33,133 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _pickAndUploadPhoto() async {
+    final picker = ImagePicker();
+    
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Pilih Foto Profil',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff1a1a1a),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildSourceButton(
+                  icon: Icons.photo_library_outlined,
+                  label: 'Galeri',
+                  onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+                ),
+                _buildSourceButton(
+                  icon: Icons.camera_alt_outlined,
+                  label: 'Kamera',
+                  onTap: () => Navigator.pop(ctx, ImageSource.camera),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final pickedFile = await picker.pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 85,
+    );
+
+    if (pickedFile == null) return;
+
+    setState(() {
+      _uploadingPhoto = true;
+    });
+
+    try {
+      final updatedUser = await AuthService.uploadPhoto(File(pickedFile.path));
+      if (mounted) {
+        setState(() {
+          _user = updatedUser;
+          _uploadingPhoto = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto profil berhasil diupload'),
+            backgroundColor: Color(0xff4CAF50),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _uploadingPhoto = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal upload: $e'),
+            backgroundColor: const Color(0xffF44336),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildSourceButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xffE3F2FD),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: const Color(0xff1E88E5), size: 28),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xff1a1a1a),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _logout() async {
@@ -123,23 +253,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          Container(
-            width: 84,
-            height: 84,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xffE3F2FD),
-              border: Border.all(color: const Color(0xff1E88E5), width: 2),
-            ),
-            child: Center(
-              child: Text(
-                _user?.initials ?? 'U',
-                style: const TextStyle(
-                  color: Color(0xff1E88E5),
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
+          GestureDetector(
+            onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
+            child: Stack(
+              children: [
+                Container(
+                  width: 84,
+                  height: 84,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xffE3F2FD),
+                    border: Border.all(color: const Color(0xff1E88E5), width: 2),
+                    image: _user?.photoUrl != null && _user!.photoUrl!.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(_user!.photoUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _user?.photoUrl == null || _user!.photoUrl!.isEmpty
+                      ? Center(
+                          child: Text(
+                            _user?.initials ?? 'U',
+                            style: const TextStyle(
+                              color: Color(0xff1E88E5),
+                              fontSize: 34,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      : null,
                 ),
-              ),
+                if (_uploadingPhoto)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xff1E88E5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 18),
@@ -377,89 +558,155 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showEditProfileSheet() {
     final nameCtrl = TextEditingController(text: _user?.name ?? '');
     final phoneCtrl = TextEditingController(text: _user?.phone ?? '');
+    bool isSaving = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffe0e0e0),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Edit Profil',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xff1a1a1a),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildInputField(
-                    controller: nameCtrl,
-                    label: 'Nama Lengkap',
-                    icon: Icons.person_outline,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildInputField(
-                    controller: phoneCtrl,
-                    label: 'No. Whatsapp',
-                    icon: Icons.phone_outlined,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(this.context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Profil berhasil diperbarui'),
-                            backgroundColor: Color(0xff4CAF50),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xff1E88E5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(sheetCtx).viewInsets.bottom),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xffe0e0e0),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        elevation: 0,
                       ),
-                      child: const Text(
-                        'Simpan',
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Edit Profil',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff1a1a1a),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      _buildInputField(
+                        controller: nameCtrl,
+                        label: 'Nama Lengkap',
+                        icon: Icons.person_outline,
+                        enabled: !isSaving,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildInputField(
+                        controller: phoneCtrl,
+                        label: 'No. Whatsapp',
+                        icon: Icons.phone_outlined,
+                        enabled: !isSaving,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: isSaving
+                              ? null
+                              : () async {
+                                  final name = nameCtrl.text.trim();
+                                  final phone = phoneCtrl.text.trim();
+
+                                  if (name.isEmpty) {
+                                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Nama tidak boleh kosong'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  if (phone.isEmpty) {
+                                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Nomor Whatsapp tidak boleh kosong'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  setSheetState(() => isSaving = true);
+
+                                  try {
+                                    final updatedUser = await AuthService.updateProfile(
+                                      name: name,
+                                      phone: phone,
+                                    );
+                                    if (sheetCtx.mounted) {
+                                      Navigator.pop(sheetCtx);
+                                      if (mounted) {
+                                        setState(() {
+                                          _user = updatedUser;
+                                        });
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Profil berhasil diperbarui'),
+                                            backgroundColor: Color(0xff4CAF50),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } catch (e) {
+                                    setSheetState(() => isSaving = false);
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Gagal memperbarui profil: $e'),
+                                          backgroundColor: const Color(0xffF44336),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xff1E88E5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: isSaving
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Simpan',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -472,17 +719,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     bool showOld = false;
     bool showNew = false;
     bool showConfirm = false;
+    bool isSaving = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Container(
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(sheetCtx).viewInsets.bottom),
+              child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -516,35 +764,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         controller: oldCtrl,
                         label: 'Password Lama',
                         showText: showOld,
-                        onToggle: () => setState(() => showOld = !showOld),
+                        onToggle: () => setSheetState(() => showOld = !showOld),
+                        enabled: !isSaving,
                       ),
                       const SizedBox(height: 14),
                       _buildPasswordField(
                         controller: newCtrl,
                         label: 'Password Baru',
                         showText: showNew,
-                        onToggle: () => setState(() => showNew = !showNew),
+                        onToggle: () => setSheetState(() => showNew = !showNew),
+                        enabled: !isSaving,
                       ),
                       const SizedBox(height: 14),
                       _buildPasswordField(
                         controller: confirmCtrl,
                         label: 'Confirm Password Baru',
                         showText: showConfirm,
-                        onToggle: () => setState(() => showConfirm = !showConfirm),
+                        onToggle: () => setSheetState(() => showConfirm = !showConfirm),
+                        enabled: !isSaving,
                       ),
                       const SizedBox(height: 24),
                       SizedBox(
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(this.context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Password berhasil diubah'),
-                                backgroundColor: Color(0xff4CAF50),
-                              ),
-                            );
-                          },
+                          onPressed: isSaving
+                              ? null
+                              : () async {
+                                  final oldPw = oldCtrl.text.trim();
+                                  final newPw = newCtrl.text.trim();
+                                  final confirmPw = confirmCtrl.text.trim();
+
+                                  if (oldPw.isEmpty) {
+                                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Password lama tidak boleh kosong'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  if (newPw.isEmpty) {
+                                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Password baru tidak boleh kosong'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  if (newPw.length < 6) {
+                                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Password baru minimal 6 karakter'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  if (newPw != confirmPw) {
+                                    ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Konfirmasi password tidak cocok'),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  setSheetState(() => isSaving = true);
+
+                                  try {
+                                    await AuthService.changePassword(
+                                      oldPassword: oldPw,
+                                      password: newPw,
+                                      passwordConfirmation: confirmPw,
+                                    );
+                                    if (sheetCtx.mounted) {
+                                      Navigator.pop(sheetCtx);
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Password berhasil diubah'),
+                                            backgroundColor: Color(0xff4CAF50),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } catch (e) {
+                                    setSheetState(() => isSaving = false);
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Gagal mengubah password: $e'),
+                                          backgroundColor: const Color(0xffF44336),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xff1E88E5),
                             shape: RoundedRectangleBorder(
@@ -552,22 +869,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'Simpan Password',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          child: isSaving
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Simpan Password',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -616,9 +942,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    bool enabled = true,
+    TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
+      enabled: enabled,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         label: Text(label),
         prefixIcon: Icon(icon, color: const Color(0xff1E88E5), size: 20),
@@ -630,12 +960,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xffE0E0E0), width: 1),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xffEEEEEE), width: 1),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xff1E88E5), width: 1.5),
         ),
         filled: true,
-        fillColor: const Color(0xfff8f9fa),
+        fillColor: enabled ? const Color(0xfff8f9fa) : const Color(0xfff1f3f5),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
@@ -646,10 +980,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String label,
     required bool showText,
     required VoidCallback onToggle,
+    bool enabled = true,
   }) {
     return TextField(
       controller: controller,
       obscureText: !showText,
+      enabled: enabled,
       decoration: InputDecoration(
         label: Text(label),
         hintText: label,
@@ -660,7 +996,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: const Color(0xff1E88E5),
             size: 20,
           ),
-          onPressed: onToggle,
+          onPressed: enabled ? onToggle : null,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -670,12 +1006,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xffE0E0E0), width: 1),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xffEEEEEE), width: 1),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xff1E88E5), width: 1.5),
         ),
         filled: true,
-        fillColor: const Color(0xfff8f9fa),
+        fillColor: enabled ? const Color(0xfff8f9fa) : const Color(0xfff1f3f5),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );

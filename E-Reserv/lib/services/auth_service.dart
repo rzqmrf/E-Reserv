@@ -2,6 +2,9 @@
 // auth_service.dart
 // ============================================================
 
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import '../models/models.dart';
 import 'api_service.dart';
 
@@ -101,5 +104,57 @@ class AuthService {
       _isLoggedIn = false;
       return null;
     }
+  }
+
+  // POST /api/profile/photo  — multipart upload
+  static Future<User> uploadPhoto(File imageFile) async {
+    final uri = Uri.parse('${ApiService.baseUrl}/profile/photo');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      'Accept': 'application/json',
+      if (ApiService.token != null) 'Authorization': 'Bearer ${ApiService.token}',
+    });
+
+    request.files.add(await http.MultipartFile.fromPath('photo', imageFile.path));
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final user = User.fromJson(body['user'] as Map<String, dynamic>);
+      _currentUser = user;
+      return user;
+    } else {
+      throw Exception(body['message'] ?? 'Gagal upload foto');
+    }
+  }
+
+  // PUT /api/profile — update nama & telepon
+  static Future<User> updateProfile({
+    required String name,
+    required String phone,
+  }) async {
+    final res = await ApiService.put('/profile', {
+      'name': name,
+      'phone': phone,
+    });
+    final user = User.fromJson(res['user']);
+    _currentUser = user;
+    return user;
+  }
+
+  // PUT /api/profile/password — ubah password
+  static Future<void> changePassword({
+    required String oldPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    await ApiService.put('/profile/password', {
+      'old_password': oldPassword,
+      'password': password,
+      'password_confirmation': passwordConfirmation,
+    });
   }
 }
